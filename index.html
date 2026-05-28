@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Concrete to Creek Trail Match Game</title>
+  <title>Concrete to Creek Connect the Dogs</title>
   <style>
     :root {
       --paper: #F1E0CA;
@@ -37,7 +37,7 @@
     }
 
     .game-shell {
-      width: min(1060px, 100%);
+      width: min(1080px, 100%);
       display: grid;
       grid-template-columns: 320px 1fr;
       gap: 22px;
@@ -46,7 +46,7 @@
 
     .panel,
     .canvas-card {
-      background: rgba(255, 248, 238, 0.92);
+      background: rgba(255, 248, 238, 0.94);
       border: 1px solid rgba(62, 58, 54, 0.18);
       border-radius: 24px;
       box-shadow: 0 18px 44px var(--shadow);
@@ -223,7 +223,7 @@
       overflow: hidden;
       border: 3px solid rgba(62, 58, 54, 0.28);
       background:
-        linear-gradient(rgba(255, 248, 238, 0.82), rgba(255, 248, 238, 0.82)),
+        linear-gradient(rgba(255, 248, 238, 0.86), rgba(255, 248, 238, 0.86)),
         url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80') center/cover;
     }
 
@@ -242,7 +242,7 @@
       bottom: 18px;
       padding: 14px 16px;
       border-radius: 18px;
-      background: rgba(255, 248, 238, 0.92);
+      background: rgba(255, 248, 238, 0.94);
       border: 1px solid rgba(62, 58, 54, 0.16);
       box-shadow: 0 10px 28px rgba(62, 58, 54, 0.16);
       font-family: Arial, sans-serif;
@@ -286,10 +286,10 @@
   <main class="game-shell">
     <section class="panel" aria-label="Game information">
       <p class="eyebrow">Concrete to Creek</p>
-      <h1>Trail Match</h1>
+      <h1>Connect the Dogs</h1>
       <p class="intro">
-        Trace the numbered route in order. Each round gets tighter, faster, and less forgiving.
-        Because apparently even a browser game needs standards.
+        Connect every numbered dog marker in order. Finish the full trail to reveal the hidden dog photo.
+        Simple idea. Somehow still enough for humans to miss marker 7.
       </p>
 
       <div class="stat-grid">
@@ -302,8 +302,8 @@
           <strong id="scoreStat">0</strong>
         </div>
         <div class="stat">
-          <span>Time</span>
-          <strong id="timeStat">45</strong>
+          <span>Dots</span>
+          <strong id="dotStat">24</strong>
         </div>
         <div class="stat">
           <span>Misses</span>
@@ -312,32 +312,32 @@
       </div>
 
       <div class="round-card">
-        <img id="roundImage" src="" alt="Dog on a trail" />
+        <img id="roundImage" src="" alt="Hidden dog preview" />
         <div class="round-copy">
           <h2 id="roundTitle">Loading trail...</h2>
-          <p id="roundDescription">The dogs are assembling, which is already more organized than most group chats.</p>
+          <p id="roundDescription">Connect the dogs to reveal who is waiting on the other side.</p>
         </div>
       </div>
 
       <div class="controls">
-        <button class="primary" id="startBtn">Start Trail</button>
+        <button class="primary" id="startBtn">Start Game</button>
         <button class="secondary" id="resetBtn">Reset Game</button>
       </div>
 
       <p class="brand-footer">
-        Built for small-group structure, calm movement, and dogs who deserve better than another lap around the block.
+        Built for calm movement, clear structure, and dogs who deserve better than another boring lap around the block.
       </p>
     </section>
 
-    <section class="canvas-card" aria-label="Trail game board">
+    <section class="canvas-card" aria-label="Connect the dogs game board">
       <div class="canvas-header">
-        <span id="instructionText">Start at marker 1 and follow the route.</span>
-        <span class="difficulty-pill" id="difficultyPill">Warmup</span>
+        <span id="instructionText">Start at dog 1 and connect each number in order.</span>
+        <span class="difficulty-pill" id="difficultyPill">24 dots</span>
       </div>
 
       <div class="canvas-wrap">
-        <canvas id="gameCanvas" width="700" height="700"></canvas>
-        <div class="message" id="messageBox">Press Start Trail. Then drag from marker to marker in order.</div>
+        <canvas id="gameCanvas" width="760" height="760"></canvas>
+        <div class="message" id="messageBox">Press Start Game. Then drag from dog 1 to dog 2, dog 3, and onward.</div>
       </div>
     </section>
   </main>
@@ -348,7 +348,7 @@
 
     const roundStat = document.getElementById('roundStat');
     const scoreStat = document.getElementById('scoreStat');
-    const timeStat = document.getElementById('timeStat');
+    const dotStat = document.getElementById('dotStat');
     const missStat = document.getElementById('missStat');
     const roundImage = document.getElementById('roundImage');
     const roundTitle = document.getElementById('roundTitle');
@@ -362,117 +362,169 @@
     const W = canvas.width;
     const H = canvas.height;
 
+    const dogPhotos = [
+      'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1525253086316-d0c936c814f8?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=1000&q=80'
+    ];
+
     const rounds = [
       {
-        title: 'Prospect Park Warmup',
-        description: 'A steady loop for dogs learning the rules before the woods get opinionated.',
-        difficulty: 'Warmup',
-        time: 45,
-        radius: 34,
-        image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=80',
-        points: [[150, 175], [300, 135], [475, 170], [555, 320], [460, 500], [280, 555], [130, 445]]
+        title: 'The City Dog Warmup',
+        description: 'Connect 20 dogs to reveal the first trail companion.',
+        dots: 20,
+        radius: 22,
+        wobble: 18,
+        photo: dogPhotos[0]
       },
       {
-        title: 'Ravine Route',
-        description: 'More markers, tighter turns, and fewer chances to pretend the leash is optional.',
-        difficulty: 'Easy',
-        time: 42,
-        radius: 32,
-        image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
-        points: [[105, 210], [240, 110], [405, 125], [565, 235], [540, 410], [405, 565], [220, 545], [110, 405]]
+        title: 'Prospect Park Loop',
+        description: 'A little longer. Still civilized. Barely.',
+        dots: 22,
+        radius: 21,
+        wobble: 28,
+        photo: dogPhotos[1]
       },
       {
         title: 'Creek Crossing',
-        description: 'The route bends near water. Stay calm. Nobody needs a theatrical splash scene.',
-        difficulty: 'Easy+',
-        time: 40,
-        radius: 30,
-        image: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=900&q=80',
-        points: [[120, 155], [270, 95], [430, 135], [555, 250], [520, 420], [390, 545], [235, 595], [115, 495], [185, 330]]
+        description: 'Connect 24 dogs before the hidden photo appears.',
+        dots: 24,
+        radius: 20,
+        wobble: 36,
+        photo: dogPhotos[2]
       },
       {
-        title: 'Pack Match',
-        description: 'The path crosses itself now. Structure matters. Chaos has enough hobbies.',
-        difficulty: 'Medium',
-        time: 38,
-        radius: 29,
-        image: 'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=900&q=80',
-        points: [[115, 130], [560, 155], [210, 525], [350, 90], [505, 535], [130, 330], [575, 345], [325, 600]]
+        title: 'Small Group Trail Day',
+        description: 'The dots get tighter. Standards arrive, rude as ever.',
+        dots: 25,
+        radius: 19,
+        wobble: 44,
+        photo: dogPhotos[3]
+      },
+      {
+        title: 'Ravine Route',
+        description: 'A winding route with 26 dogs to connect.',
+        dots: 26,
+        radius: 18,
+        wobble: 52,
+        photo: dogPhotos[4]
       },
       {
         title: 'Long Line Lesson',
-        description: 'A cleaner route with smaller targets. Freedom, but with management. Fancy concept.',
-        difficulty: 'Medium',
-        time: 36,
-        radius: 27,
-        image: 'https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=900&q=80',
-        points: [[95, 185], [215, 95], [370, 125], [605, 110], [520, 300], [620, 500], [390, 575], [250, 450], [105, 555], [175, 315]]
-      },
-      {
-        title: 'Hudson Valley Climb',
-        description: 'The trail gets steep. The standards remain annoying, which is how safety works.',
-        difficulty: 'Medium+',
-        time: 34,
-        radius: 26,
-        image: 'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=900&q=80',
-        points: [[115, 585], [150, 385], [85, 205], [255, 115], [390, 245], [570, 125], [610, 330], [470, 430], [540, 595], [320, 555], [245, 365]]
-      },
-      {
-        title: 'Quiet Trail Test',
-        description: 'Fewer visual hints. Better trail manners. Stunning what happens when someone plans.',
-        difficulty: 'Hard',
-        time: 32,
-        radius: 24,
-        image: 'https://images.unsplash.com/photo-1525253086316-d0c936c814f8?auto=format&fit=crop&w=900&q=80',
-        points: [[90, 120], [250, 80], [405, 165], [580, 90], [625, 255], [470, 340], [610, 505], [410, 610], [285, 470], [120, 585], [185, 330]]
-      },
-      {
-        title: 'Trail Report',
-        description: 'This one rewards precision. The browser, tragically, has become your handler.',
-        difficulty: 'Hard',
-        time: 30,
-        radius: 23,
-        image: 'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?auto=format&fit=crop&w=900&q=80',
-        points: [[340, 70], [430, 205], [610, 165], [510, 330], [625, 485], [445, 460], [375, 625], [280, 465], [100, 520], [190, 350], [80, 190], [260, 235]]
+        description: 'Follow the sequence. The hidden dog is judging quietly.',
+        dots: 27,
+        radius: 17,
+        wobble: 60,
+        photo: dogPhotos[5]
       },
       {
         title: 'Off-City Adventure',
-        description: 'Fast clock. Small targets. The city dog earns the woods today.',
-        difficulty: 'Expert',
-        time: 28,
-        radius: 22,
-        image: 'https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?auto=format&fit=crop&w=900&q=80',
-        points: [[100, 105], [285, 70], [235, 225], [430, 110], [590, 180], [455, 285], [620, 390], [480, 550], [315, 430], [205, 610], [95, 455], [225, 340]]
+        description: '28 dots. Smaller targets. Less room for nonsense.',
+        dots: 28,
+        radius: 16,
+        wobble: 68,
+        photo: dogPhotos[6]
       },
       {
-        title: 'Wild Day Final',
-        description: 'The final route. Calm hands, clean lines, no nonsense. A shocking idea online.',
-        difficulty: 'Final',
-        time: 25,
-        radius: 20,
-        image: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=900&q=80',
-        points: [[350, 60], [510, 125], [465, 270], [620, 230], [565, 405], [440, 360], [480, 610], [325, 500], [190, 625], [230, 390], [75, 470], [185, 300], [80, 135], [260, 210]]
+        title: 'Trail Manners Test',
+        description: 'A more crowded map. A better reveal if you survive the numbers.',
+        dots: 29,
+        radius: 15,
+        wobble: 76,
+        photo: dogPhotos[7]
+      },
+      {
+        title: 'Wild Day Challenge',
+        description: '30 dogs to connect. The browser has become a wilderness guide, naturally.',
+        dots: 30,
+        radius: 14,
+        wobble: 82,
+        photo: dogPhotos[8]
+      },
+      {
+        title: 'Final Pack Reveal',
+        description: '30 tight dots. Finish the route to reveal the final dog photo.',
+        dots: 30,
+        radius: 13,
+        wobble: 92,
+        photo: dogPhotos[9]
       }
     ];
 
     let roundIndex = 0;
-    let currentPointIndex = 0;
+    let points = [];
+    let currentIndex = 0;
     let isDrawing = false;
-    let gameStarted = false;
-    let roundComplete = false;
+    let started = false;
+    let revealed = false;
     let gameComplete = false;
     let mouse = { x: 0, y: 0 };
     let score = 0;
     let misses = 0;
-    let timeLeft = rounds[0].time;
-    let timer = null;
-    let completedPath = [];
     let wrongFlash = 0;
-
-    const dogIcons = ['🐕', '🐾', '🐶', '🦴'];
+    let revealImage = new Image();
 
     function getRound() {
       return rounds[roundIndex];
+    }
+
+    function makeDogShapePoints(count, wobble) {
+      const centerX = W / 2;
+      const centerY = H / 2 + 10;
+      const pts = [];
+
+      for (let i = 0; i < count; i++) {
+        const t = (Math.PI * 2 * i) / count;
+
+        // A loose dog-head outline: ears, cheeks, chin, and head curve.
+        let rx = 245;
+        let ry = 225;
+
+        const topBoost = Math.max(0, Math.cos(t + Math.PI / 2));
+        const earLeft = Math.exp(-Math.pow(t - 4.05, 2) / 0.08);
+        const earRight = Math.exp(-Math.pow(t - 5.38, 2) / 0.08);
+        const cheekLeft = Math.exp(-Math.pow(t - 2.75, 2) / 0.18);
+        const cheekRight = Math.exp(-Math.pow(t - 0.39, 2) / 0.18);
+        const chin = Math.exp(-Math.pow(t - Math.PI / 2, 2) / 0.16);
+
+        rx += cheekLeft * 38 + cheekRight * 38 - chin * 20;
+        ry += earLeft * 88 + earRight * 88 - topBoost * 20 + chin * 42;
+
+        let x = centerX + Math.cos(t) * rx;
+        let y = centerY + Math.sin(t) * ry;
+
+        // Pull ear points upward and outward so the outline feels dog-like.
+        if (earLeft > 0.25) {
+          x -= earLeft * 32;
+          y -= earLeft * 120;
+        }
+        if (earRight > 0.25) {
+          x += earRight * 32;
+          y -= earRight * 120;
+        }
+
+        const offset = Math.sin(i * 1.7 + count) * wobble;
+        const offset2 = Math.cos(i * 2.1 + count) * wobble * 0.55;
+
+        x += offset;
+        y += offset2;
+
+        pts.push({
+          x: Math.max(55, Math.min(W - 55, x)),
+          y: Math.max(55, Math.min(H - 55, y))
+        });
+      }
+
+      // Rotate so marker 1 starts near the upper-left ear, which feels natural for connect-the-dots.
+      const startOffset = Math.floor(count * 0.62);
+      return pts.slice(startOffset).concat(pts.slice(0, startOffset));
     }
 
     function distance(a, b) {
@@ -484,118 +536,163 @@
       const source = e.touches ? e.touches[0] : e;
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
+
       return {
         x: (source.clientX - rect.left) * scaleX,
         y: (source.clientY - rect.top) * scaleY
       };
     }
 
+    function pointFromTouchEnd(e) {
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.changedTouches[0];
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      return {
+        x: (touch.clientX - rect.left) * scaleX,
+        y: (touch.clientY - rect.top) * scaleY
+      };
+    }
+
+    function loadRound() {
+      const round = getRound();
+      points = makeDogShapePoints(round.dots, round.wobble);
+      currentIndex = 0;
+      isDrawing = false;
+      revealed = false;
+      revealImage = new Image();
+      revealImage.crossOrigin = 'anonymous';
+      revealImage.src = round.photo;
+      roundImage.src = round.photo;
+      updateHud();
+      draw();
+    }
+
     function updateHud() {
       const round = getRound();
       roundStat.textContent = `${roundIndex + 1} / ${rounds.length}`;
       scoreStat.textContent = score;
-      timeStat.textContent = timeLeft;
+      dotStat.textContent = round.dots;
       missStat.textContent = misses;
+      difficultyPill.textContent = `${round.dots} dots`;
       roundTitle.textContent = round.title;
       roundDescription.textContent = round.description;
-      roundImage.src = round.image;
-      difficultyPill.textContent = round.difficulty;
     }
 
     function setMessage(text, persistent = false) {
       messageBox.textContent = text;
       messageBox.classList.remove('hidden');
+
       if (!persistent) {
         window.clearTimeout(setMessage.timeout);
         setMessage.timeout = window.setTimeout(() => {
-          if (gameStarted && !roundComplete && !gameComplete) messageBox.classList.add('hidden');
+          if (started && !revealed && !gameComplete) messageBox.classList.add('hidden');
         }, 2200);
       }
-    }
-
-    function startTimer() {
-      window.clearInterval(timer);
-      timer = window.setInterval(() => {
-        if (!gameStarted || roundComplete || gameComplete) return;
-        timeLeft -= 1;
-        updateHud();
-        if (timeLeft <= 0) {
-          misses += 1;
-          score = Math.max(0, score - 75);
-          setMessage('Time ran out. Back to marker 1. Nature is patient. This game is not.', true);
-          resetRound(false);
-        }
-      }, 1000);
     }
 
     function startGame() {
       roundIndex = 0;
       score = 0;
       misses = 0;
+      started = true;
       gameComplete = false;
       loadRound();
-      gameStarted = true;
-      startTimer();
-      setMessage('Trace from marker 1 to marker 2. Stay inside the targets.', false);
-      draw();
+      instructionText.textContent = 'Drag from dog 1 to dog 2, then keep going in order.';
+      setMessage('Start at dog 1. Connect every dog marker to reveal the photo.', false);
     }
 
-    function loadRound() {
-      const round = getRound();
-      currentPointIndex = 0;
-      roundComplete = false;
-      isDrawing = false;
-      timeLeft = round.time;
-      completedPath = [toPoint(round.points[0])];
-      updateHud();
-      draw();
-    }
-
-    function resetRound(resetScore = true) {
-      if (resetScore) {
-        score = 0;
-        misses = 0;
-        roundIndex = 0;
-        gameComplete = false;
-      }
+    function resetGame() {
+      roundIndex = 0;
+      score = 0;
+      misses = 0;
+      started = false;
+      revealed = false;
+      gameComplete = false;
       loadRound();
-      updateHud();
-    }
-
-    function toPoint(pair) {
-      return { x: pair[0], y: pair[1] };
-    }
-
-    function currentTarget() {
-      return toPoint(getRound().points[currentPointIndex]);
-    }
-
-    function nextTarget() {
-      return toPoint(getRound().points[currentPointIndex + 1]);
+      instructionText.textContent = 'Start at dog 1 and connect each number in order.';
+      setMessage('Game reset. Press Start Game when ready.', true);
     }
 
     function drawBackgroundDetails() {
       ctx.save();
-      ctx.globalAlpha = 0.36;
+      ctx.globalAlpha = 0.30;
 
       ctx.strokeStyle = '#8FAFC2';
-      ctx.lineWidth = 24;
+      ctx.lineWidth = 26;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(20, 520);
-      ctx.bezierCurveTo(175, 435, 210, 590, 360, 500);
-      ctx.bezierCurveTo(510, 410, 540, 545, 690, 445);
+      ctx.moveTo(15, 585);
+      ctx.bezierCurveTo(190, 475, 230, 650, 395, 535);
+      ctx.bezierCurveTo(560, 420, 580, 575, 745, 465);
       ctx.stroke();
 
-      ctx.globalAlpha = 0.2;
+      ctx.globalAlpha = 0.18;
       ctx.fillStyle = '#6D695F';
-      for (let i = 0; i < 28; i++) {
-        const x = (i * 97) % W;
-        const y = (i * 151) % H;
+      for (let i = 0; i < 34; i++) {
+        const x = (i * 103) % W;
+        const y = (i * 149) % H;
         ctx.beginPath();
-        ctx.arc(x, y, 14 + (i % 3) * 7, 0, Math.PI * 2);
+        ctx.arc(x, y, 12 + (i % 4) * 5, 0, Math.PI * 2);
         ctx.fill();
       }
+
+      ctx.restore();
+    }
+
+    function drawRevealImage() {
+      ctx.save();
+
+      if (revealImage.complete && revealImage.naturalWidth > 0) {
+        const padding = 46;
+        const size = W - padding * 2;
+        const imgRatio = revealImage.naturalWidth / revealImage.naturalHeight;
+        const boxRatio = 1;
+        let sx = 0;
+        let sy = 0;
+        let sw = revealImage.naturalWidth;
+        let sh = revealImage.naturalHeight;
+
+        if (imgRatio > boxRatio) {
+          sw = revealImage.naturalHeight * boxRatio;
+          sx = (revealImage.naturalWidth - sw) / 2;
+        } else {
+          sh = revealImage.naturalWidth / boxRatio;
+          sy = (revealImage.naturalHeight - sh) / 2;
+        }
+
+        ctx.globalAlpha = 0.95;
+        roundedImage(revealImage, sx, sy, sw, sh, padding, padding, size, size, 28);
+      }
+
+      ctx.fillStyle = 'rgba(255, 248, 238, 0.86)';
+      ctx.fillRect(0, 0, W, 92);
+      ctx.fillStyle = '#3E3A36';
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 36px Georgia';
+      ctx.fillText(gameComplete ? 'Final Dog Revealed' : 'Dog Revealed', W / 2, 42);
+      ctx.font = '16px Arial';
+      ctx.fillText(gameComplete ? `Final score: ${score}` : 'Next round loading...', W / 2, 70);
+
+      ctx.restore();
+    }
+
+    function roundedImage(img, sx, sy, sw, sh, dx, dy, dw, dh, radius) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(dx + radius, dy);
+      ctx.lineTo(dx + dw - radius, dy);
+      ctx.quadraticCurveTo(dx + dw, dy, dx + dw, dy + radius);
+      ctx.lineTo(dx + dw, dy + dh - radius);
+      ctx.quadraticCurveTo(dx + dw, dy + dh, dx + dw - radius, dy + dh);
+      ctx.lineTo(dx + radius, dy + dh);
+      ctx.quadraticCurveTo(dx, dy + dh, dx, dy + dh - radius);
+      ctx.lineTo(dx, dy + radius);
+      ctx.quadraticCurveTo(dx, dy, dx + radius, dy);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
       ctx.restore();
     }
 
@@ -603,16 +700,17 @@
       ctx.clearRect(0, 0, W, H);
       drawBackgroundDetails();
 
-      const round = getRound();
-      const points = round.points.map(toPoint);
+      if (revealed || gameComplete) {
+        drawRevealImage();
+        return;
+      }
 
       ctx.save();
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
 
-      ctx.strokeStyle = 'rgba(62, 58, 54, 0.18)';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([8, 12]);
+      // Draw guide line in a light dotted style so the player knows the hidden route.
+      ctx.strokeStyle = 'rgba(62, 58, 54, 0.20)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 8]);
       ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) {
@@ -621,51 +719,62 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      if (completedPath.length > 1) {
+      // Completed connection line.
+      if (currentIndex > 0) {
         ctx.strokeStyle = '#E66637';
-        ctx.lineWidth = 7;
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         ctx.beginPath();
-        ctx.moveTo(completedPath[0].x, completedPath[0].y);
-        for (let i = 1; i < completedPath.length; i++) {
-          ctx.lineTo(completedPath[i].x, completedPath[i].y);
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i <= currentIndex; i++) {
+          ctx.lineTo(points[i].x, points[i].y);
         }
         ctx.stroke();
       }
 
-      if (isDrawing && gameStarted && !roundComplete) {
-        const start = currentTarget();
-        ctx.strokeStyle = 'rgba(230, 102, 55, 0.75)';
+      // Temporary drag line.
+      if (isDrawing && started) {
+        ctx.strokeStyle = 'rgba(230, 102, 55, 0.72)';
         ctx.lineWidth = 4;
-        ctx.setLineDash([6, 8]);
+        ctx.setLineDash([8, 8]);
         ctx.beginPath();
-        ctx.moveTo(start.x, start.y);
+        ctx.moveTo(points[currentIndex].x, points[currentIndex].y);
         ctx.lineTo(mouse.x, mouse.y);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
       points.forEach((p, index) => {
-        const isDone = index < currentPointIndex;
-        const isCurrent = index === currentPointIndex;
-        const isNext = index === currentPointIndex + 1;
+        const isDone = index < currentIndex;
+        const isCurrent = index === currentIndex;
+        const isNext = index === currentIndex + 1;
+        const radius = getRound().radius;
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, round.radius, 0, Math.PI * 2);
-        ctx.fillStyle = isDone ? 'rgba(109, 105, 95, 0.45)' : isCurrent ? 'rgba(230, 102, 55, 0.92)' : isNext ? 'rgba(143, 175, 194, 0.86)' : 'rgba(255, 248, 238, 0.92)';
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = isDone
+          ? 'rgba(109, 105, 95, 0.42)'
+          : isCurrent
+            ? 'rgba(230, 102, 55, 0.94)'
+            : isNext
+              ? 'rgba(143, 175, 194, 0.90)'
+              : 'rgba(255, 248, 238, 0.96)';
         ctx.fill();
+
         ctx.lineWidth = isCurrent ? 4 : 2;
         ctx.strokeStyle = isCurrent ? '#3E3A36' : 'rgba(62, 58, 54, 0.55)';
         ctx.stroke();
 
         ctx.fillStyle = '#3E3A36';
-        ctx.font = 'bold 18px Arial';
+        ctx.font = radius <= 14 ? 'bold 11px Arial' : 'bold 13px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(index + 1, p.x, p.y);
+        ctx.fillText(index + 1, p.x, p.y + 1);
 
-        if (index % 3 === 0) {
+        if (index === 0 || index === points.length - 1) {
           ctx.font = '18px Arial';
-          ctx.fillText(dogIcons[index % dogIcons.length], p.x, p.y - round.radius - 13);
+          ctx.fillText('🐶', p.x, p.y - radius - 14);
         }
       });
 
@@ -676,33 +785,24 @@
         requestAnimationFrame(draw);
       }
 
-      if (roundComplete || gameComplete) {
-        ctx.fillStyle = 'rgba(255, 248, 238, 0.86)';
-        ctx.fillRect(0, 0, W, H);
-        ctx.fillStyle = '#3E3A36';
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 42px Georgia';
-        ctx.fillText(gameComplete ? 'Trail Complete' : 'Round Cleared', W / 2, H / 2 - 20);
-        ctx.font = '18px Arial';
-        ctx.fillText(gameComplete ? `Final score: ${score}` : 'Loading next route...', W / 2, H / 2 + 25);
-      }
-
       ctx.restore();
     }
 
     function handleStart(e) {
-      if (!gameStarted || roundComplete || gameComplete) return;
+      if (!started || revealed || gameComplete) return;
+
+      e.preventDefault();
       const pos = pointFromEvent(e);
       mouse = pos;
-      const start = currentTarget();
+      const currentPoint = points[currentIndex];
 
-      if (distance(pos, start) <= getRound().radius + 8) {
+      if (distance(pos, currentPoint) <= getRound().radius + 12) {
         isDrawing = true;
-        setMessage('');
         messageBox.classList.add('hidden');
       } else {
-        registerMiss('Start on the current marker. The trail does not begin wherever vibes suggest.');
+        registerMiss('Start on the active dog marker. The trail does not begin wherever confidence happens.');
       }
+
       draw();
     }
 
@@ -720,95 +820,80 @@
 
       const pos = e.changedTouches ? pointFromTouchEnd(e) : pointFromEvent(e);
       mouse = pos;
-      const target = nextTarget();
+      const nextPoint = points[currentIndex + 1];
 
-      if (target && distance(pos, target) <= getRound().radius + 10) {
-        currentPointIndex += 1;
-        completedPath.push(target);
-        score += 100 + Math.max(0, timeLeft * 2) - misses * 4;
-        updateHud();
+      if (nextPoint && distance(pos, nextPoint) <= getRound().radius + 14) {
+        currentIndex += 1;
+        score += 50;
 
-        if (currentPointIndex === getRound().points.length - 1) {
-          finishRound();
+        if (currentIndex === points.length - 1) {
+          revealRound();
         } else {
-          instructionText.textContent = `Good. Now connect marker ${currentPointIndex + 1} to marker ${currentPointIndex + 2}.`;
+          instructionText.textContent = `Good. Now connect dog ${currentIndex + 1} to dog ${currentIndex + 2}.`;
         }
       } else {
-        registerMiss('Wrong marker, or not close enough. Precision, tragically, is part of the job.');
+        registerMiss('Wrong dog, or not close enough. Numbers remain undefeated.');
       }
 
+      updateHud();
       draw();
-    }
-
-    function pointFromTouchEnd(e) {
-      const rect = canvas.getBoundingClientRect();
-      const touch = e.changedTouches[0];
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      return {
-        x: (touch.clientX - rect.left) * scaleX,
-        y: (touch.clientY - rect.top) * scaleY
-      };
     }
 
     function registerMiss(text) {
       misses += 1;
-      score = Math.max(0, score - 35);
+      score = Math.max(0, score - 25);
       wrongFlash = 0.16;
-      updateHud();
       setMessage(text, false);
+      updateHud();
       draw();
     }
 
-    function finishRound() {
-      roundComplete = true;
-      score += 250 + timeLeft * 8;
+    function revealRound() {
+      revealed = true;
+      score += getRound().dots * 25;
       updateHud();
 
       if (roundIndex === rounds.length - 1) {
         gameComplete = true;
-        gameStarted = false;
-        window.clearInterval(timer);
-        setMessage('All routes cleared. The dog is regulated. The human is questionable, but improving.', true);
+        started = false;
+        setMessage('All dog photos revealed. The pack is complete. Civilization may continue.', true);
         draw();
         return;
       }
 
-      setMessage('Round cleared. Next route loading.', true);
+      setMessage('Dog photo revealed. Next round loading.', true);
       draw();
+
       window.setTimeout(() => {
         roundIndex += 1;
         loadRound();
-        roundComplete = false;
-        setMessage('New route. Start at marker 1.', false);
-      }, 1400);
+        revealed = false;
+        instructionText.textContent = 'Start at dog 1 and connect each number in order.';
+        setMessage('New hidden dog photo. Connect every marker to reveal it.', false);
+      }, 2200);
     }
 
     startBtn.addEventListener('click', startGame);
-    resetBtn.addEventListener('click', () => {
-      window.clearInterval(timer);
-      gameStarted = false;
-      gameComplete = false;
-      resetRound(true);
-      setMessage('Game reset. Press Start Trail when ready.', true);
-      instructionText.textContent = 'Start at marker 1 and follow the route.';
-    });
+    resetBtn.addEventListener('click', resetGame);
 
     canvas.addEventListener('mousedown', handleStart);
     canvas.addEventListener('mousemove', handleMove);
     canvas.addEventListener('mouseup', handleEnd);
-    canvas.addEventListener('mouseleave', () => { isDrawing = false; draw(); });
+    canvas.addEventListener('mouseleave', () => {
+      isDrawing = false;
+      draw();
+    });
 
     canvas.addEventListener('touchstart', handleStart, { passive: false });
     canvas.addEventListener('touchmove', handleMove, { passive: false });
     canvas.addEventListener('touchend', handleEnd, { passive: false });
 
     roundImage.addEventListener('error', () => {
-      roundImage.src = 'https://images.unsplash.com/photo-1444212477490-ca407925329e?auto=format&fit=crop&w=900&q=80';
+      roundImage.src = 'https://images.unsplash.com/photo-1444212477490-ca407925329e?auto=format&fit=crop&w=1000&q=80';
     });
 
     loadRound();
-    setMessage('Press Start Trail. Then drag from marker to marker in order.', true);
+    setMessage('Press Start Game. Then drag from dog 1 to dog 2, dog 3, and onward.', true);
   </script>
 </body>
 </html>
