@@ -2,369 +2,471 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Concrete to Creek Connect the Dogs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#F1E0CA" />
+  <title>Connect the Dogs | Concrete to Creek</title>
   <style>
     :root {
       --paper: #F1E0CA;
       --paper-light: #FAF3E8;
+      --cream: #FFF8EE;
       --ink: #3E3A36;
       --sage: #6D695F;
       --water: #8FAFC2;
       --trail: #E66637;
-      --cream: #FFF8EE;
-      --mistake: #B55342;
+      --error: #B55342;
+      --success: #5F744E;
       --shadow: rgba(62, 58, 54, 0.18);
     }
 
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(143, 175, 194, 0.28), transparent 25%),
+        radial-gradient(circle at 85% 10%, rgba(230, 102, 55, 0.12), transparent 24%),
+        linear-gradient(160deg, var(--paper), var(--paper-light));
+      color: var(--ink);
+      font-family: Arial, sans-serif;
     }
 
     body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Georgia, 'Times New Roman', serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 12% 18%, rgba(143, 175, 194, 0.28), transparent 26%),
-        radial-gradient(circle at 82% 12%, rgba(230, 102, 55, 0.12), transparent 22%),
-        linear-gradient(135deg, var(--paper), var(--paper-light));
+      min-height: 100svh;
       display: flex;
       justify-content: center;
-      align-items: center;
-      padding: 22px;
+      padding: 12px;
+      overscroll-behavior: none;
     }
 
-    .game-shell {
-      width: min(1080px, 100%);
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 22px;
-      align-items: stretch;
-    }
-
-    .panel,
-    .canvas-card {
-      background: rgba(255, 248, 238, 0.94);
-      border: 1px solid rgba(62, 58, 54, 0.18);
-      border-radius: 24px;
-      box-shadow: 0 18px 44px var(--shadow);
-    }
-
-    .panel {
-      padding: 24px;
+    .app {
+      width: min(440px, 100%);
+      min-height: calc(100svh - 24px);
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 10px;
+    }
+
+    .top-card,
+    .game-card,
+    .bottom-card,
+    .modal-card {
+      background: rgba(255, 248, 238, 0.94);
+      border: 1px solid rgba(62, 58, 54, 0.16);
+      box-shadow: 0 14px 34px var(--shadow);
+    }
+
+    .top-card {
+      border-radius: 22px;
+      padding: 14px 14px 12px;
+    }
+
+    .brand-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
     }
 
     .eyebrow {
       margin: 0;
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-      letter-spacing: 0.16em;
+      font-size: 11px;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--sage);
-      font-weight: 700;
+      font-weight: 800;
+    }
+
+    .round-pill {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: rgba(109, 105, 95, 0.13);
+      border: 1px solid rgba(62, 58, 54, 0.12);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: var(--ink);
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(32px, 4vw, 46px);
-      line-height: 0.95;
-      letter-spacing: -0.04em;
-    }
-
-    .intro {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      font-size: 15px;
-      line-height: 1.55;
-      color: var(--sage);
-    }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .stat {
-      background: rgba(241, 224, 202, 0.68);
-      border: 1px solid rgba(62, 58, 54, 0.12);
-      border-radius: 16px;
-      padding: 12px;
-      font-family: Arial, sans-serif;
-    }
-
-    .stat span {
-      display: block;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--sage);
-      margin-bottom: 5px;
-      font-weight: 700;
-    }
-
-    .stat strong {
-      font-size: 24px;
-      line-height: 1;
-    }
-
-    .round-card {
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid rgba(62, 58, 54, 0.16);
-      background: white;
-    }
-
-    .round-card img {
-      display: block;
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      filter: saturate(0.85) contrast(0.96);
-    }
-
-    .round-copy {
-      padding: 14px;
-      font-family: Arial, sans-serif;
-    }
-
-    .round-copy h2 {
-      margin: 0 0 6px;
-      font-size: 18px;
       font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(30px, 9vw, 42px);
+      line-height: 0.95;
+      letter-spacing: -0.045em;
     }
 
-    .round-copy p {
-      margin: 0;
-      font-size: 13px;
-      line-height: 1.45;
-      color: var(--sage);
-    }
-
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: auto;
-    }
-
-    button {
-      appearance: none;
-      border: 0;
-      border-radius: 999px;
-      padding: 13px 16px;
-      font-family: Arial, sans-serif;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(62, 58, 54, 0.16);
-    }
-
-    button:active {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-
-    .primary {
-      background: var(--trail);
-      color: #241D18;
-    }
-
-    .secondary {
-      background: rgba(143, 175, 194, 0.55);
-      color: var(--ink);
-    }
-
-    .canvas-card {
-      padding: 18px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .canvas-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 12px;
-      font-family: Arial, sans-serif;
+    .subtitle {
+      margin: 8px 0 0;
       color: var(--sage);
       font-size: 14px;
+      line-height: 1.4;
     }
 
-    .difficulty-pill {
-      background: rgba(109, 105, 95, 0.14);
-      border: 1px solid rgba(62, 58, 54, 0.12);
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .hud-item {
+      background: rgba(241, 224, 202, 0.72);
+      border: 1px solid rgba(62, 58, 54, 0.10);
+      border-radius: 15px;
+      padding: 8px 6px;
+      text-align: center;
+      min-width: 0;
+    }
+
+    .hud-label {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--ink);
+      color: var(--sage);
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .hud-value {
+      display: block;
+      font-size: 17px;
+      font-weight: 900;
+      line-height: 1;
       white-space: nowrap;
+    }
+
+    .game-card {
+      position: relative;
+      border-radius: 24px;
+      padding: 10px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     .canvas-wrap {
       position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      min-height: 320px;
-      border-radius: 22px;
+      flex: 1;
+      min-height: 520px;
+      border-radius: 20px;
       overflow: hidden;
-      border: 3px solid rgba(62, 58, 54, 0.28);
+      border: 2px solid rgba(62, 58, 54, 0.24);
       background:
-        linear-gradient(rgba(255, 248, 238, 0.86), rgba(255, 248, 238, 0.86)),
-        url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80') center/cover;
+        linear-gradient(rgba(255, 248, 238, 0.88), rgba(255, 248, 238, 0.88)),
+        url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=900&q=80') center/cover;
     }
 
     canvas {
+      display: block;
       width: 100%;
       height: 100%;
-      display: block;
       touch-action: none;
-      cursor: crosshair;
+      cursor: pointer;
     }
 
-    .message {
+    .toast {
       position: absolute;
-      left: 18px;
-      right: 18px;
-      bottom: 18px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(255, 248, 238, 0.94);
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 5;
+      padding: 11px 13px;
+      border-radius: 16px;
+      background: rgba(255, 248, 238, 0.96);
       border: 1px solid rgba(62, 58, 54, 0.16);
-      box-shadow: 0 10px 28px rgba(62, 58, 54, 0.16);
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      line-height: 1.45;
+      box-shadow: 0 10px 24px rgba(62, 58, 54, 0.16);
       color: var(--ink);
+      font-size: 13px;
+      line-height: 1.35;
       pointer-events: none;
     }
 
-    .hidden {
+    .toast.hidden {
       display: none;
     }
 
-    .brand-footer {
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-      color: var(--sage);
-      line-height: 1.45;
+    .bottom-card {
+      border-radius: 22px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
-    @media (max-width: 860px) {
+    button,
+    a.button-link {
+      appearance: none;
+      border: 0;
+      min-height: 48px;
+      border-radius: 999px;
+      padding: 13px 14px;
+      font-size: 14px;
+      font-weight: 900;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      color: #241D18;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    button:active,
+    a.button-link:active {
+      transform: scale(0.98);
+    }
+
+    .primary {
+      background: var(--trail);
+    }
+
+    .secondary {
+      background: rgba(143, 175, 194, 0.58);
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(62, 58, 54, 0.42);
+    }
+
+    .modal-backdrop.visible {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(410px, 100%);
+      max-height: calc(100svh - 36px);
+      overflow: auto;
+      border-radius: 26px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .modal-card img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 20px;
+      border: 1px solid rgba(62, 58, 54, 0.18);
+      margin-bottom: 14px;
+      filter: saturate(0.92) contrast(0.96);
+    }
+
+    .modal-card h2 {
+      margin: 0 0 8px;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 30px;
+      letter-spacing: -0.035em;
+      line-height: 1;
+    }
+
+    .modal-card p {
+      margin: 0 0 14px;
+      color: var(--sage);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .score-breakdown {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .score-box {
+      background: rgba(241, 224, 202, 0.72);
+      border: 1px solid rgba(62, 58, 54, 0.10);
+      border-radius: 16px;
+      padding: 10px 8px;
+    }
+
+    .score-box span {
+      display: block;
+      color: var(--sage);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .score-box strong {
+      font-size: 20px;
+    }
+
+    .modal-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .tiny-note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--sage);
+      line-height: 1.35;
+    }
+
+    @media (max-height: 740px) {
       body {
-        align-items: flex-start;
+        padding: 8px;
       }
 
-      .game-shell {
-        grid-template-columns: 1fr;
+      .app {
+        min-height: calc(100svh - 16px);
+        gap: 8px;
       }
 
-      .panel {
-        order: 2;
+      .top-card {
+        padding: 12px;
       }
 
-      .canvas-card {
-        order: 1;
+      h1 {
+        font-size: 30px;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .canvas-wrap {
+        min-height: 440px;
+      }
+
+      .hud {
+        margin-top: 9px;
       }
     }
   </style>
 </head>
 <body>
-  <main class="game-shell">
-    <section class="panel" aria-label="Game information">
-      <p class="eyebrow">Concrete to Creek</p>
+  <main class="app">
+    <section class="top-card">
+      <div class="brand-row">
+        <p class="eyebrow">Concrete to Creek</p>
+        <div class="round-pill" id="roundPill">Round 1 / 10</div>
+      </div>
       <h1>Connect the Dogs</h1>
-      <p class="intro">
-        Connect every numbered dog marker in order. Finish the full trail to reveal the hidden dog photo.
-        Simple idea. Somehow still enough for humans to miss marker 7.
-      </p>
+      <p class="subtitle" id="roundDescription">Tap or drag through every dog in order to reveal the hidden trail dog.</p>
 
-      <div class="stat-grid">
-        <div class="stat">
-          <span>Round</span>
-          <strong id="roundStat">1 / 10</strong>
+      <div class="hud" aria-label="Game stats">
+        <div class="hud-item">
+          <span class="hud-label">Score</span>
+          <span class="hud-value" id="scoreStat">0</span>
         </div>
-        <div class="stat">
-          <span>Score</span>
-          <strong id="scoreStat">0</strong>
+        <div class="hud-item">
+          <span class="hud-label">Time</span>
+          <span class="hud-value" id="timeStat">0.0s</span>
         </div>
-        <div class="stat">
-          <span>Time</span>
-          <strong id="timeStat">0.0s</strong>
+        <div class="hud-item">
+          <span class="hud-label">Next</span>
+          <span class="hud-value" id="nextStat">1</span>
         </div>
-        <div class="stat">
-          <span>Accuracy</span>
-          <strong id="accuracyStat">100%</strong>
+        <div class="hud-item">
+          <span class="hud-label">Accuracy</span>
+          <span class="hud-value" id="accuracyStat">100%</span>
         </div>
       </div>
-
-      <div class="round-card">
-        <img id="roundImage" src="" alt="Hidden dog preview" />
-        <div class="round-copy">
-          <h2 id="roundTitle">Loading trail...</h2>
-          <p id="roundDescription">Connect the dogs to reveal who is waiting on the other side.</p>
-        </div>
-      </div>
-
-      <div class="controls">
-        <button class="primary" id="startBtn">Start Game</button>
-        <button class="secondary" id="resetBtn">Reset Game</button>
-      </div>
-
-      <p class="brand-footer">
-        Built for calm movement, clear structure, and dogs who deserve better than another boring lap around the block.
-      </p>
     </section>
 
-    <section class="canvas-card" aria-label="Connect the dogs game board">
-      <div class="canvas-header">
-        <span id="instructionText">Start at dog 1 and connect each number in order.</span>
-        <span class="difficulty-pill" id="difficultyPill">24 dots</span>
-      </div>
-
+    <section class="game-card" aria-label="Connect the dogs game board">
       <div class="canvas-wrap">
-        <canvas id="gameCanvas" width="760" height="760"></canvas>
-        <div class="message" id="messageBox">Press Start Game. Then drag from dog 1 to dog 2, dog 3, and onward.</div>
+        <canvas id="gameCanvas" width="420" height="640"></canvas>
+        <div class="toast" id="toast">Press Start. Then tap dog 1, dog 2, dog 3, and keep going. Revolutionary stuff.</div>
       </div>
+    </section>
+
+    <section class="bottom-card">
+      <button class="primary" id="startBtn">Start</button>
+      <button class="secondary" id="resetBtn">Reset</button>
     </section>
   </main>
+
+  <div class="modal-backdrop" id="roundModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <img id="modalImage" src="" alt="Revealed dog" />
+      <h2 id="modalTitle">Dog Revealed</h2>
+      <p id="modalText">Clean route. Good work. The dog accepts this effort, probably.</p>
+
+      <div class="score-breakdown">
+        <div class="score-box">
+          <span>Time</span>
+          <strong id="modalTime">0.0s</strong>
+        </div>
+        <div class="score-box">
+          <span>Accuracy</span>
+          <strong id="modalAccuracy">100%</strong>
+        </div>
+        <div class="score-box">
+          <span>Bonus</span>
+          <strong id="modalBonus">+0</strong>
+        </div>
+        <div class="score-box">
+          <span>Total</span>
+          <strong id="modalScore">0</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions" id="modalActions">
+        <button class="primary" id="nextRoundBtn">Next Round</button>
+      </div>
+
+      <p class="tiny-note">Urban dogs. Wild days. Tiny phone game. Humanity contains multitudes.</p>
+    </div>
+  </div>
 
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    const roundStat = document.getElementById('roundStat');
+    const roundPill = document.getElementById('roundPill');
+    const roundDescription = document.getElementById('roundDescription');
     const scoreStat = document.getElementById('scoreStat');
     const timeStat = document.getElementById('timeStat');
+    const nextStat = document.getElementById('nextStat');
     const accuracyStat = document.getElementById('accuracyStat');
-    const roundImage = document.getElementById('roundImage');
-    const roundTitle = document.getElementById('roundTitle');
-    const roundDescription = document.getElementById('roundDescription');
-    const instructionText = document.getElementById('instructionText');
-    const difficultyPill = document.getElementById('difficultyPill');
-    const messageBox = document.getElementById('messageBox');
+    const toast = document.getElementById('toast');
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
+
+    const roundModal = document.getElementById('roundModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const modalTime = document.getElementById('modalTime');
+    const modalAccuracy = document.getElementById('modalAccuracy');
+    const modalBonus = document.getElementById('modalBonus');
+    const modalScore = document.getElementById('modalScore');
+    const modalActions = document.getElementById('modalActions');
+    const nextRoundBtn = document.getElementById('nextRoundBtn');
 
     const W = canvas.width;
     const H = canvas.height;
 
     const dogMarkerEmojis = [
-      '🐶', '🐕', '🐕‍🦺', '🦮', '🐩', '🐾', '🦴', '🥾', '🌲', '🍂',
-      '🐶', '🐕', '🐕‍🦺', '🦮', '🐩', '🐾', '🦴', '🌿', '🏞️', '🍃',
+      '🐶', '🐕', '🐕‍🦺', '🦮', '🐩', '🐾', '🦴', '🌲', '🍂', '🌿',
+      '🐶', '🐕', '🐕‍🦺', '🦮', '🐩', '🐾', '🦴', '🏞️', '🍃', '🥾',
       '🐶', '🐕', '🐕‍🦺', '🦮', '🐩', '🐾', '🦴', '🌲', '🌿', '🍂'
     ];
 
@@ -382,164 +484,152 @@
     ];
 
     const rounds = [
-      {
-        title: 'The City Dog Warmup',
-        description: 'Connect 20 dogs to reveal the first trail companion.',
-        dots: 20,
-        radius: 22,
-        wobble: 18,
-        photo: dogPhotos[0]
-      },
-      {
-        title: 'Prospect Park Loop',
-        description: 'A little longer. Still civilized. Barely.',
-        dots: 22,
-        radius: 21,
-        wobble: 28,
-        photo: dogPhotos[1]
-      },
-      {
-        title: 'Creek Crossing',
-        description: 'Connect 24 dogs before the hidden photo appears.',
-        dots: 24,
-        radius: 20,
-        wobble: 36,
-        photo: dogPhotos[2]
-      },
-      {
-        title: 'Small Group Trail Day',
-        description: 'The dots get tighter. Standards arrive, rude as ever.',
-        dots: 25,
-        radius: 19,
-        wobble: 44,
-        photo: dogPhotos[3]
-      },
-      {
-        title: 'Ravine Route',
-        description: 'A winding route with 26 dogs to connect.',
-        dots: 26,
-        radius: 18,
-        wobble: 52,
-        photo: dogPhotos[4]
-      },
-      {
-        title: 'Long Line Lesson',
-        description: 'Follow the sequence. The hidden dog is judging quietly.',
-        dots: 27,
-        radius: 17,
-        wobble: 60,
-        photo: dogPhotos[5]
-      },
-      {
-        title: 'Off-City Adventure',
-        description: '28 dots. Smaller targets. Less room for nonsense.',
-        dots: 28,
-        radius: 16,
-        wobble: 68,
-        photo: dogPhotos[6]
-      },
-      {
-        title: 'Trail Manners Test',
-        description: 'A more crowded map. A better reveal if you survive the numbers.',
-        dots: 29,
-        radius: 15,
-        wobble: 76,
-        photo: dogPhotos[7]
-      },
-      {
-        title: 'Wild Day Challenge',
-        description: '30 dogs to connect. The browser has become a wilderness guide, naturally.',
-        dots: 30,
-        radius: 14,
-        wobble: 82,
-        photo: dogPhotos[8]
-      },
-      {
-        title: 'Final Pack Reveal',
-        description: '30 tight dots. Finish the route to reveal the final dog photo.',
-        dots: 30,
-        radius: 13,
-        wobble: 92,
-        photo: dogPhotos[9]
-      }
+      { title: 'City Dog Warmup', description: '20 dogs. Start simple before the trail gets ideas.', dots: 20, radius: 22, wobble: 10, photo: dogPhotos[0] },
+      { title: 'Prospect Park Loop', description: '22 dogs. A longer route, still mostly polite.', dots: 22, radius: 21, wobble: 15, photo: dogPhotos[1] },
+      { title: 'Creek Crossing', description: '24 dogs. Tap carefully. Splashing is not a strategy.', dots: 24, radius: 20, wobble: 20, photo: dogPhotos[2] },
+      { title: 'Small Group Trail Day', description: '25 dogs. Structure, spacing, standards. Radical.', dots: 25, radius: 19, wobble: 24, photo: dogPhotos[3] },
+      { title: 'Ravine Route', description: '26 dogs. The numbers start acting less friendly.', dots: 26, radius: 18, wobble: 28, photo: dogPhotos[4] },
+      { title: 'Long Line Lesson', description: '27 dogs. Freedom, but with management. Imagine that.', dots: 27, radius: 17, wobble: 32, photo: dogPhotos[5] },
+      { title: 'Off-City Adventure', description: '28 dogs. Smaller targets. Cleaner hands.', dots: 28, radius: 16, wobble: 36, photo: dogPhotos[6] },
+      { title: 'Trail Manners Test', description: '29 dogs. The hidden dog is watching your choices.', dots: 29, radius: 15, wobble: 40, photo: dogPhotos[7] },
+      { title: 'Wild Day Challenge', description: '30 dogs. The pack has standards now.', dots: 30, radius: 14, wobble: 44, photo: dogPhotos[8] },
+      { title: 'Final Pack Reveal', description: '30 tight dogs. Finish clean and meet the final trail dog.', dots: 30, radius: 13, wobble: 48, photo: dogPhotos[9] }
     ];
 
     let roundIndex = 0;
     let points = [];
     let currentIndex = 0;
-    let isDrawing = false;
     let started = false;
-    let revealed = false;
-    let gameComplete = false;
-    let mouse = { x: 0, y: 0 };
+    let isDragging = false;
     let score = 0;
     let misses = 0;
     let attempts = 0;
-    let roundStartTime = null;
     let elapsedSeconds = 0;
+    let roundStartTime = null;
     let stopwatchTimer = null;
-    let lastRoundBonus = 0;
     let wrongFlash = 0;
+    let lastBonus = 0;
+    let lastAccuracy = 100;
     let revealImage = new Image();
 
     function getRound() {
       return rounds[roundIndex];
     }
 
-    function makeDogShapePoints(count, wobble) {
-      const centerX = W / 2;
-      const centerY = H / 2 + 10;
+    function makePoints(count, wobble) {
       const pts = [];
+      const marginX = 52;
+      const top = 54;
+      const bottom = H - 58;
+      const usableHeight = bottom - top;
+      const centerX = W / 2;
 
       for (let i = 0; i < count; i++) {
-        const t = (Math.PI * 2 * i) / count;
-
-        // A loose dog-head outline: ears, cheeks, chin, and head curve.
-        let rx = 245;
-        let ry = 225;
-
-        const topBoost = Math.max(0, Math.cos(t + Math.PI / 2));
-        const earLeft = Math.exp(-Math.pow(t - 4.05, 2) / 0.08);
-        const earRight = Math.exp(-Math.pow(t - 5.38, 2) / 0.08);
-        const cheekLeft = Math.exp(-Math.pow(t - 2.75, 2) / 0.18);
-        const cheekRight = Math.exp(-Math.pow(t - 0.39, 2) / 0.18);
-        const chin = Math.exp(-Math.pow(t - Math.PI / 2, 2) / 0.16);
-
-        rx += cheekLeft * 38 + cheekRight * 38 - chin * 20;
-        ry += earLeft * 88 + earRight * 88 - topBoost * 20 + chin * 42;
-
-        let x = centerX + Math.cos(t) * rx;
-        let y = centerY + Math.sin(t) * ry;
-
-        // Pull ear points upward and outward so the outline feels dog-like.
-        if (earLeft > 0.25) {
-          x -= earLeft * 32;
-          y -= earLeft * 120;
-        }
-        if (earRight > 0.25) {
-          x += earRight * 32;
-          y -= earRight * 120;
-        }
-
-        const offset = Math.sin(i * 1.7 + count) * wobble;
-        const offset2 = Math.cos(i * 2.1 + count) * wobble * 0.55;
-
-        x += offset;
-        y += offset2;
+        const progress = i / (count - 1);
+        const y = top + usableHeight * progress;
+        const wave1 = Math.sin(progress * Math.PI * 5.2) * (72 + wobble);
+        const wave2 = Math.sin(progress * Math.PI * 10.4 + 1.7) * (18 + wobble * 0.35);
+        const dogHeadCurve = Math.sin(progress * Math.PI) * 18;
+        const x = centerX + wave1 + wave2 + dogHeadCurve;
 
         pts.push({
-          x: Math.max(55, Math.min(W - 55, x)),
-          y: Math.max(55, Math.min(H - 55, y))
+          x: Math.max(marginX, Math.min(W - marginX, x)),
+          y
         });
       }
 
-      // Rotate so marker 1 starts near the upper-left ear, which feels natural for connect-the-dots.
-      const startOffset = Math.floor(count * 0.62);
-      return pts.slice(startOffset).concat(pts.slice(0, startOffset));
+      return pts;
     }
 
-    function distance(a, b) {
-      return Math.hypot(a.x - b.x, a.y - b.y);
+    function loadRound() {
+      const round = getRound();
+      points = makePoints(round.dots, round.wobble);
+      currentIndex = 0;
+      attempts = 0;
+      misses = 0;
+      elapsedSeconds = 0;
+      lastBonus = 0;
+      lastAccuracy = 100;
+      revealImage = new Image();
+      revealImage.crossOrigin = 'anonymous';
+      revealImage.src = round.photo;
+      updateHud();
+      draw();
+    }
+
+    function startStopwatch() {
+      stopStopwatch(false);
+      roundStartTime = performance.now();
+      stopwatchTimer = window.setInterval(() => {
+        if (!started || !roundStartTime) return;
+        elapsedSeconds = (performance.now() - roundStartTime) / 1000;
+        updateHud();
+      }, 100);
+    }
+
+    function stopStopwatch(finalize = true) {
+      window.clearInterval(stopwatchTimer);
+      stopwatchTimer = null;
+      if (finalize && roundStartTime) {
+        elapsedSeconds = (performance.now() - roundStartTime) / 1000;
+      }
+      roundStartTime = null;
+      updateHud();
+    }
+
+    function getAccuracy() {
+      return attempts === 0 ? 100 : Math.max(0, Math.round(((attempts - misses) / attempts) * 100));
+    }
+
+    function calculateBonus() {
+      const round = getRound();
+      const targetTime = round.dots * 1.15;
+      const speedBonus = Math.max(0, Math.round((targetTime - elapsedSeconds) * 14));
+      const accuracyRate = getAccuracy() / 100;
+      const accuracyBonus = Math.round(round.dots * 18 * accuracyRate);
+      const perfectBonus = misses === 0 ? 250 : 0;
+      return Math.max(0, speedBonus + accuracyBonus + perfectBonus);
+    }
+
+    function updateHud() {
+      const round = getRound();
+      roundPill.textContent = `Round ${roundIndex + 1} / ${rounds.length}`;
+      roundDescription.textContent = round.description;
+      scoreStat.textContent = score;
+      timeStat.textContent = `${elapsedSeconds.toFixed(1)}s`;
+      nextStat.textContent = Math.min(currentIndex + 1, round.dots);
+      accuracyStat.textContent = `${getAccuracy()}%`;
+    }
+
+    function showToast(message, persistent = false) {
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      window.clearTimeout(showToast.timeout);
+
+      if (!persistent) {
+        showToast.timeout = window.setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 1900);
+      }
+    }
+
+    function startGame() {
+      roundIndex = 0;
+      score = 0;
+      started = true;
+      loadRound();
+      startStopwatch();
+      showToast('Tap dog 1, then dog 2, then keep going. Dragging also works.', false);
+    }
+
+    function resetGame() {
+      started = false;
+      isDragging = false;
+      stopStopwatch(false);
+      roundIndex = 0;
+      score = 0;
+      loadRound();
+      showToast('Game reset. Press Start when ready.', true);
     }
 
     function pointFromEvent(e) {
@@ -547,221 +637,53 @@
       const source = e.touches ? e.touches[0] : e;
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
-
       return {
         x: (source.clientX - rect.left) * scaleX,
         y: (source.clientY - rect.top) * scaleY
       };
     }
 
-    function pointFromTouchEnd(e) {
-      const rect = canvas.getBoundingClientRect();
-      const touch = e.changedTouches[0];
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-
-      return {
-        x: (touch.clientX - rect.left) * scaleX,
-        y: (touch.clientY - rect.top) * scaleY
-      };
+    function distance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
     }
 
-    function loadRound() {
-      const round = getRound();
-      points = makeDogShapePoints(round.dots, round.wobble);
-      currentIndex = 0;
-      isDrawing = false;
-      revealed = false;
-      attempts = 0;
-      elapsedSeconds = 0;
-      lastRoundBonus = 0;
-      stopStopwatch();
-      revealImage = new Image();
-      revealImage.crossOrigin = 'anonymous';
-      revealImage.src = round.photo;
-      roundImage.src = round.photo;
-      updateHud();
-      draw();
-    }
-
-    function updateHud() {
-      const round = getRound();
-      const accuracy = attempts === 0 ? 100 : Math.max(0, Math.round(((attempts - misses) / attempts) * 100));
-      roundStat.textContent = `${roundIndex + 1} / ${rounds.length}`;
-      scoreStat.textContent = score;
-      timeStat.textContent = `${elapsedSeconds.toFixed(1)}s`;
-      accuracyStat.textContent = `${accuracy}%`;
-      difficultyPill.textContent = `${round.dots} dots`;
-      roundTitle.textContent = round.title;
-      roundDescription.textContent = round.description;
-    }
-
-    function startStopwatch() {
-      stopStopwatch();
-      roundStartTime = performance.now();
-      elapsedSeconds = 0;
-      stopwatchTimer = window.setInterval(() => {
-        if (!started || revealed || gameComplete || !roundStartTime) return;
-        elapsedSeconds = (performance.now() - roundStartTime) / 1000;
-        updateHud();
-      }, 100);
-    }
-
-    function stopStopwatch() {
-      window.clearInterval(stopwatchTimer);
-      stopwatchTimer = null;
-      if (roundStartTime) {
-        elapsedSeconds = (performance.now() - roundStartTime) / 1000;
-      }
-      roundStartTime = null;
-      updateHud();
-    }
-
-    function calculateRoundBonus() {
-      const round = getRound();
-      const expectedCleanTime = round.dots * 1.25;
-      const speedScore = Math.max(0, Math.round((expectedCleanTime - elapsedSeconds) * 12));
-      const accuracyRate = attempts === 0 ? 1 : Math.max(0, (attempts - misses) / attempts);
-      const accuracyBonus = Math.round(round.dots * 20 * accuracyRate);
-      const perfectBonus = misses === 0 ? 250 : 0;
-      return Math.max(0, speedScore + accuracyBonus + perfectBonus);
-    }
-
-    function setMessage(text, persistent = false) {
-      messageBox.textContent = text;
-      messageBox.classList.remove('hidden');
-
-      if (!persistent) {
-        window.clearTimeout(setMessage.timeout);
-        setMessage.timeout = window.setTimeout(() => {
-          if (started && !revealed && !gameComplete) messageBox.classList.add('hidden');
-        }, 2200);
-      }
-    }
-
-    function startGame() {
-      roundIndex = 0;
-      score = 0;
-      misses = 0;
-      attempts = 0;
-      elapsedSeconds = 0;
-      started = true;
-      gameComplete = false;
-      loadRound();
-      startStopwatch();
-      instructionText.textContent = 'Drag from dog 1 to dog 2, then keep going in order.';
-      setMessage('Start at dog 1. Connect every dog marker to reveal the photo.', false);
-    }
-
-    function resetGame() {
-      stopStopwatch();
-      roundIndex = 0;
-      score = 0;
-      misses = 0;
-      attempts = 0;
-      elapsedSeconds = 0;
-      started = false;
-      revealed = false;
-      gameComplete = false;
-      loadRound();
-      instructionText.textContent = 'Start at dog 1 and connect each number in order.';
-      setMessage('Game reset. Press Start Game when ready.', true);
-    }
-
-    function drawBackgroundDetails() {
+    function drawTrailBackground() {
       ctx.save();
-      ctx.globalAlpha = 0.30;
+      ctx.globalAlpha = 0.28;
 
       ctx.strokeStyle = '#8FAFC2';
-      ctx.lineWidth = 26;
+      ctx.lineWidth = 22;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(15, 585);
-      ctx.bezierCurveTo(190, 475, 230, 650, 395, 535);
-      ctx.bezierCurveTo(560, 420, 580, 575, 745, 465);
+      ctx.moveTo(22, H - 95);
+      ctx.bezierCurveTo(115, H - 180, 165, H - 20, 260, H - 130);
+      ctx.bezierCurveTo(350, H - 230, 285, H - 320, 398, H - 410);
       ctx.stroke();
 
-      ctx.globalAlpha = 0.18;
+      ctx.globalAlpha = 0.16;
       ctx.fillStyle = '#6D695F';
-      for (let i = 0; i < 34; i++) {
-        const x = (i * 103) % W;
-        const y = (i * 149) % H;
+      for (let i = 0; i < 24; i++) {
+        const x = (i * 71) % W;
+        const y = (i * 127) % H;
         ctx.beginPath();
-        ctx.arc(x, y, 12 + (i % 4) * 5, 0, Math.PI * 2);
+        ctx.arc(x, y, 9 + (i % 3) * 4, 0, Math.PI * 2);
         ctx.fill();
       }
 
       ctx.restore();
     }
 
-    function drawRevealImage() {
-      ctx.save();
-
-      if (revealImage.complete && revealImage.naturalWidth > 0) {
-        const padding = 46;
-        const size = W - padding * 2;
-        const imgRatio = revealImage.naturalWidth / revealImage.naturalHeight;
-        const boxRatio = 1;
-        let sx = 0;
-        let sy = 0;
-        let sw = revealImage.naturalWidth;
-        let sh = revealImage.naturalHeight;
-
-        if (imgRatio > boxRatio) {
-          sw = revealImage.naturalHeight * boxRatio;
-          sx = (revealImage.naturalWidth - sw) / 2;
-        } else {
-          sh = revealImage.naturalWidth / boxRatio;
-          sy = (revealImage.naturalHeight - sh) / 2;
-        }
-
-        ctx.globalAlpha = 0.95;
-        roundedImage(revealImage, sx, sy, sw, sh, padding, padding, size, size, 28);
-      }
-
-      ctx.fillStyle = 'rgba(255, 248, 238, 0.86)';
-      ctx.fillRect(0, 0, W, 92);
-      ctx.fillStyle = '#3E3A36';
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 36px Georgia';
-      ctx.fillText(gameComplete ? 'Final Dog Revealed' : 'Dog Revealed', W / 2, 42);
-      ctx.font = '16px Arial';
-      ctx.fillText(gameComplete ? `Final score: ${score}` : `Bonus: +${lastRoundBonus}. Next round loading...`, W / 2, 70);
-
-      ctx.restore();
-    }
-
-    function roundedImage(img, sx, sy, sw, sh, dx, dy, dw, dh, radius) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(dx + radius, dy);
-      ctx.lineTo(dx + dw - radius, dy);
-      ctx.quadraticCurveTo(dx + dw, dy, dx + dw, dy + radius);
-      ctx.lineTo(dx + dw, dy + dh - radius);
-      ctx.quadraticCurveTo(dx + dw, dy + dh, dx + dw - radius, dy + dh);
-      ctx.lineTo(dx + radius, dy + dh);
-      ctx.quadraticCurveTo(dx, dy + dh, dx, dy + dh - radius);
-      ctx.lineTo(dx, dy + radius);
-      ctx.quadraticCurveTo(dx, dy, dx + radius, dy);
-      ctx.closePath();
-      ctx.clip();
-      ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-      ctx.restore();
-    }
-
     function draw() {
       ctx.clearRect(0, 0, W, H);
-      drawBackgroundDetails();
+      drawTrailBackground();
 
-      if (revealed || gameComplete) {
-        drawRevealImage();
-        return;
-      }
+      if (!points.length) return;
 
       ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
-      // Draw guide line in a light dotted style so the player knows the hidden route.
-      ctx.strokeStyle = 'rgba(62, 58, 54, 0.20)';
+      ctx.strokeStyle = 'rgba(62, 58, 54, 0.17)';
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 8]);
       ctx.beginPath();
@@ -772,12 +694,9 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Completed connection line.
       if (currentIndex > 0) {
         ctx.strokeStyle = '#E66637';
         ctx.lineWidth = 5;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
         ctx.beginPath();
         ctx.moveTo(points[0].x, points[0].y);
         for (let i = 1; i <= currentIndex; i++) {
@@ -786,180 +705,206 @@
         ctx.stroke();
       }
 
-      // Temporary drag line.
-      if (isDrawing && started) {
-        ctx.strokeStyle = 'rgba(230, 102, 55, 0.72)';
-        ctx.lineWidth = 4;
-        ctx.setLineDash([8, 8]);
-        ctx.beginPath();
-        ctx.moveTo(points[currentIndex].x, points[currentIndex].y);
-        ctx.lineTo(mouse.x, mouse.y);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-
       points.forEach((p, index) => {
-        const isDone = index < currentIndex;
-        const isCurrent = index === currentIndex;
-        const isNext = index === currentIndex + 1;
-        const radius = getRound().radius;
-        const markerEmoji = dogMarkerEmojis[index % dogMarkerEmojis.length];
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, radius + 9, 0, Math.PI * 2);
-        ctx.fillStyle = isDone
-          ? 'rgba(109, 105, 95, 0.34)'
-          : isCurrent
-            ? 'rgba(230, 102, 55, 0.92)'
-            : isNext
-              ? 'rgba(143, 175, 194, 0.90)'
-              : 'rgba(255, 248, 238, 0.96)';
-        ctx.fill();
-
-        ctx.lineWidth = isCurrent ? 4 : 2;
-        ctx.strokeStyle = isCurrent ? '#3E3A36' : 'rgba(62, 58, 54, 0.55)';
-        ctx.stroke();
-
-        ctx.font = radius <= 14 ? '18px Arial' : '20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(markerEmoji, p.x, p.y - 5);
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y + radius + 8, 10, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 248, 238, 0.94)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(62, 58, 54, 0.42)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        ctx.fillStyle = '#3E3A36';
-        ctx.font = 'bold 10px Arial';
-        ctx.fillText(index + 1, p.x, p.y + radius + 9);
+        drawMarker(p, index);
       });
 
       if (wrongFlash > 0) {
         ctx.fillStyle = `rgba(181, 83, 66, ${wrongFlash})`;
         ctx.fillRect(0, 0, W, H);
-        wrongFlash -= 0.04;
+        wrongFlash -= 0.035;
         requestAnimationFrame(draw);
       }
 
       ctx.restore();
     }
 
-    function handleStart(e) {
-      if (!started || revealed || gameComplete) return;
+    function drawMarker(p, index) {
+      const round = getRound();
+      const isDone = index < currentIndex;
+      const isCurrent = index === currentIndex;
+      const isNext = index === currentIndex + 1;
+      const emoji = dogMarkerEmojis[index % dogMarkerEmojis.length];
+      const r = round.radius + 12;
 
-      e.preventDefault();
-      const pos = pointFromEvent(e);
-      mouse = pos;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = isDone
+        ? 'rgba(109, 105, 95, 0.36)'
+        : isCurrent
+          ? 'rgba(230, 102, 55, 0.96)'
+          : isNext
+            ? 'rgba(143, 175, 194, 0.92)'
+            : 'rgba(255, 248, 238, 0.98)';
+      ctx.fill();
+      ctx.lineWidth = isCurrent ? 4 : 2;
+      ctx.strokeStyle = isCurrent ? '#3E3A36' : 'rgba(62, 58, 54, 0.50)';
+      ctx.stroke();
+
+      ctx.font = round.radius <= 14 ? '18px Arial' : '20px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(emoji, p.x, p.y - 5);
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y + r - 1, 10, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 248, 238, 0.95)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(62, 58, 54, 0.34)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = '#3E3A36';
+      ctx.font = 'bold 10px Arial';
+      ctx.fillText(index + 1, p.x, p.y + r);
+    }
+
+    function processInput(pos) {
+      if (!started || !points.length) return;
+
       const currentPoint = points[currentIndex];
-
-      if (distance(pos, currentPoint) <= getRound().radius + 12) {
-        if (!roundStartTime) startStopwatch();
-        isDrawing = true;
-        messageBox.classList.add('hidden');
-      } else {
-        registerMiss('Start on the active dog marker. The trail does not begin wherever confidence happens.');
-      }
-
-      draw();
-    }
-
-    function handleMove(e) {
-      if (!isDrawing) return;
-      e.preventDefault();
-      mouse = pointFromEvent(e);
-      draw();
-    }
-
-    function handleEnd(e) {
-      if (!isDrawing) return;
-      e.preventDefault();
-      isDrawing = false;
-
-      const pos = e.changedTouches ? pointFromTouchEnd(e) : pointFromEvent(e);
-      mouse = pos;
       const nextPoint = points[currentIndex + 1];
+      const targetPoint = currentIndex === 0 ? currentPoint : nextPoint;
+      const targetIndex = currentIndex === 0 ? 0 : currentIndex + 1;
+      const hitRadius = getRound().radius + 22;
 
-      attempts += 1;
+      if (!targetPoint) return;
 
-      if (nextPoint && distance(pos, nextPoint) <= getRound().radius + 14) {
-        currentIndex += 1;
-        score += 50;
+      if (distance(pos, targetPoint) <= hitRadius) {
+        attempts += 1;
 
-        if (currentIndex === points.length - 1) {
-          revealRound();
+        if (targetIndex === 0) {
+          currentIndex = 1;
+          score += 50;
+          showToast('Good. Now dog 2. The bar is on the floor, but still.', false);
         } else {
-          instructionText.textContent = `Good. Now connect dog ${currentIndex + 1} to dog ${currentIndex + 2}.`;
+          currentIndex += 1;
+          score += 50;
+        }
+
+        if (currentIndex >= points.length - 1) {
+          finishRound();
         }
       } else {
-        registerMiss('Wrong dog, or not close enough. Numbers remain undefeated.');
+        const anyMarkerHit = points.findIndex((p) => distance(pos, p) <= hitRadius);
+        if (anyMarkerHit !== -1) {
+          registerMiss(`Wrong dog. Next is ${targetIndex + 1}. Numbers, cruel little things.`);
+        }
       }
 
       updateHud();
       draw();
     }
 
-    function registerMiss(text) {
+    function registerMiss(message) {
+      attempts += 1;
       misses += 1;
       score = Math.max(0, score - 25);
       wrongFlash = 0.16;
-      setMessage(text, false);
-      updateHud();
-      draw();
+      showToast(message, false);
     }
 
-    function revealRound() {
-      stopStopwatch();
-      revealed = true;
-      lastRoundBonus = calculateRoundBonus();
-      score += getRound().dots * 25 + lastRoundBonus;
+    function finishRound() {
+      stopStopwatch(true);
+      lastAccuracy = getAccuracy();
+      lastBonus = calculateBonus();
+      score += getRound().dots * 25 + lastBonus;
       updateHud();
+      showRoundModal(false);
+    }
 
-      if (roundIndex === rounds.length - 1) {
-        gameComplete = true;
+    function showRoundModal(finalRound) {
+      const round = getRound();
+      modalImage.src = round.photo;
+      modalTitle.textContent = finalRound ? 'Final Pack Revealed' : 'Dog Revealed';
+      modalText.textContent = finalRound
+        ? 'You found the full pack. The dogs are settled. The humans remain a long-term project.'
+        : `${round.title} complete. Speed and accuracy bonus added.`;
+      modalTime.textContent = `${elapsedSeconds.toFixed(1)}s`;
+      modalAccuracy.textContent = `${lastAccuracy}%`;
+      modalBonus.textContent = `+${lastBonus}`;
+      modalScore.textContent = score;
+
+      modalActions.innerHTML = '';
+
+      if (finalRound) {
+        const bookLink = document.createElement('a');
+        bookLink.className = 'button-link primary';
+        bookLink.href = 'https://www.concretetocreek.com/';
+        bookLink.textContent = 'Visit Concrete to Creek';
+
+        const playAgain = document.createElement('button');
+        playAgain.className = 'secondary';
+        playAgain.textContent = 'Play Again';
+        playAgain.addEventListener('click', () => {
+          roundModal.classList.remove('visible');
+          startGame();
+        });
+
+        modalActions.appendChild(bookLink);
+        modalActions.appendChild(playAgain);
+      } else {
+        const nextButton = document.createElement('button');
+        nextButton.className = 'primary';
+        nextButton.textContent = 'Next Round';
+        nextButton.addEventListener('click', nextRound);
+        modalActions.appendChild(nextButton);
+      }
+
+      roundModal.classList.add('visible');
+    }
+
+    function nextRound() {
+      roundModal.classList.remove('visible');
+
+      if (roundIndex >= rounds.length - 1) {
         started = false;
-        setMessage('All dog photos revealed. The pack is complete. Civilization may continue.', true);
-        draw();
+        showRoundModal(true);
         return;
       }
 
-      setMessage(`Dog photo revealed. Bonus: +${lastRoundBonus} based on speed and accuracy. Next round loading.`, true);
-      draw();
+      roundIndex += 1;
+      loadRound();
+      started = true;
+      startStopwatch();
+      showToast('New round. Start at dog 1.', false);
+    }
 
-      window.setTimeout(() => {
-        roundIndex += 1;
-        loadRound();
-        revealed = false;
-        startStopwatch();
-        instructionText.textContent = 'Start at dog 1 and connect each number in order.';
-        setMessage('New hidden dog photo. Connect every marker to reveal it.', false);
-      }, 2200);
+    function handlePointerStart(e) {
+      e.preventDefault();
+      isDragging = true;
+      const pos = pointFromEvent(e);
+      processInput(pos);
+    }
+
+    function handlePointerMove(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      const pos = pointFromEvent(e);
+      processInput(pos);
+    }
+
+    function handlePointerEnd(e) {
+      e.preventDefault();
+      isDragging = false;
     }
 
     startBtn.addEventListener('click', startGame);
     resetBtn.addEventListener('click', resetGame);
+    nextRoundBtn.addEventListener('click', nextRound);
 
-    canvas.addEventListener('mousedown', handleStart);
-    canvas.addEventListener('mousemove', handleMove);
-    canvas.addEventListener('mouseup', handleEnd);
-    canvas.addEventListener('mouseleave', () => {
-      isDrawing = false;
-      draw();
-    });
+    canvas.addEventListener('mousedown', handlePointerStart);
+    canvas.addEventListener('mousemove', handlePointerMove);
+    canvas.addEventListener('mouseup', handlePointerEnd);
+    canvas.addEventListener('mouseleave', handlePointerEnd);
 
-    canvas.addEventListener('touchstart', handleStart, { passive: false });
-    canvas.addEventListener('touchmove', handleMove, { passive: false });
-    canvas.addEventListener('touchend', handleEnd, { passive: false });
-
-    roundImage.addEventListener('error', () => {
-      roundImage.src = 'https://images.unsplash.com/photo-1444212477490-ca407925329e?auto=format&fit=crop&w=1000&q=80';
-    });
+    canvas.addEventListener('touchstart', handlePointerStart, { passive: false });
+    canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
+    canvas.addEventListener('touchend', handlePointerEnd, { passive: false });
+    canvas.addEventListener('touchcancel', handlePointerEnd, { passive: false });
 
     loadRound();
-    setMessage('Press Start Game. Then drag from dog 1 to dog 2, dog 3, and onward.', true);
+    showToast('Press Start. Then tap or drag through each dog in order.', true);
   </script>
 </body>
 </html>
