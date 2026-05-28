@@ -116,7 +116,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 7px;
-      margin-top: 12px;
+      margin-top: 0;
     }
 
     .hud-item {
@@ -159,7 +159,7 @@
     .canvas-wrap {
       position: relative;
       flex: 1;
-      min-height: 520px;
+      min-height: 500px;
       border-radius: 20px;
       overflow: hidden;
       border: 2px solid rgba(62, 58, 54, 0.24);
@@ -203,6 +203,20 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
+    }
+
+    .top-controls {
+      order: 2;
+    }
+
+    .game-card {
+      order: 3;
+    }
+
+    .stats-card {
+      order: 4;
+      grid-template-columns: 1fr;
+      padding: 10px;
     }
 
     button,
@@ -370,6 +384,21 @@
       <h1>Connect the Dogs</h1>
       <p class="subtitle" id="roundDescription">Tap or drag through every dog in order to reveal the hidden trail dog.</p>
 
+      </section>
+
+    <section class="bottom-card top-controls">
+      <button class="primary" id="startBtn">Start</button>
+      <button class="secondary" id="resetBtn">Reset</button>
+    </section>
+
+    <section class="game-card" aria-label="Connect the dogs game board">
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas" width="420" height="640"></canvas>
+        <div class="toast" id="toast">Press Start. Then tap dog 1, dog 2, dog 3, and keep going. Revolutionary stuff.</div>
+      </div>
+    </section>
+
+    <section class="bottom-card stats-card">
       <div class="hud" aria-label="Game stats">
         <div class="hud-item">
           <span class="hud-label">Score</span>
@@ -388,18 +417,6 @@
           <span class="hud-value" id="accuracyStat">100%</span>
         </div>
       </div>
-    </section>
-
-    <section class="game-card" aria-label="Connect the dogs game board">
-      <div class="canvas-wrap">
-        <canvas id="gameCanvas" width="420" height="640"></canvas>
-        <div class="toast" id="toast">Press Start. Then tap dog 1, dog 2, dog 3, and keep going. Revolutionary stuff.</div>
-      </div>
-    </section>
-
-    <section class="bottom-card">
-      <button class="primary" id="startBtn">Start</button>
-      <button class="secondary" id="resetBtn">Reset</button>
     </section>
   </main>
 
@@ -484,16 +501,16 @@
     ];
 
     const rounds = [
-      { title: 'City Dog Warmup', description: '20 dogs. Start simple before the trail gets ideas.', dots: 20, radius: 22, wobble: 10, photo: dogPhotos[0] },
-      { title: 'Prospect Park Loop', description: '22 dogs. A longer route, still mostly polite.', dots: 22, radius: 21, wobble: 15, photo: dogPhotos[1] },
-      { title: 'Creek Crossing', description: '24 dogs. Tap carefully. Splashing is not a strategy.', dots: 24, radius: 20, wobble: 20, photo: dogPhotos[2] },
-      { title: 'Small Group Trail Day', description: '25 dogs. Structure, spacing, standards. Radical.', dots: 25, radius: 19, wobble: 24, photo: dogPhotos[3] },
-      { title: 'Ravine Route', description: '26 dogs. The numbers start acting less friendly.', dots: 26, radius: 18, wobble: 28, photo: dogPhotos[4] },
-      { title: 'Long Line Lesson', description: '27 dogs. Freedom, but with management. Imagine that.', dots: 27, radius: 17, wobble: 32, photo: dogPhotos[5] },
-      { title: 'Off-City Adventure', description: '28 dogs. Smaller targets. Cleaner hands.', dots: 28, radius: 16, wobble: 36, photo: dogPhotos[6] },
-      { title: 'Trail Manners Test', description: '29 dogs. The hidden dog is watching your choices.', dots: 29, radius: 15, wobble: 40, photo: dogPhotos[7] },
-      { title: 'Wild Day Challenge', description: '30 dogs. The pack has standards now.', dots: 30, radius: 14, wobble: 44, photo: dogPhotos[8] },
-      { title: 'Final Pack Reveal', description: '30 tight dogs. Finish clean and meet the final trail dog.', dots: 30, radius: 13, wobble: 48, photo: dogPhotos[9] }
+      { title: 'City Dog Warmup', description: '20 dogs. Start simple before the trail gets ideas.', dots: 20, radius: 14, wobble: 10, photo: dogPhotos[0] },
+      { title: 'Prospect Park Loop', description: '22 dogs. A longer route, still mostly polite.', dots: 22, radius: 14, wobble: 15, photo: dogPhotos[1] },
+      { title: 'Creek Crossing', description: '24 dogs. Tap carefully. Splashing is not a strategy.', dots: 24, radius: 13, wobble: 20, photo: dogPhotos[2] },
+      { title: 'Small Group Trail Day', description: '25 dogs. Structure, spacing, standards. Radical.', dots: 25, radius: 13, wobble: 24, photo: dogPhotos[3] },
+      { title: 'Ravine Route', description: '26 dogs. The numbers start acting less friendly.', dots: 26, radius: 12, wobble: 28, photo: dogPhotos[4] },
+      { title: 'Long Line Lesson', description: '27 dogs. Freedom, but with management. Imagine that.', dots: 27, radius: 12, wobble: 32, photo: dogPhotos[5] },
+      { title: 'Off-City Adventure', description: '28 dogs. Smaller targets. Cleaner hands.', dots: 28, radius: 11, wobble: 36, photo: dogPhotos[6] },
+      { title: 'Trail Manners Test', description: '29 dogs. The hidden dog is watching your choices.', dots: 29, radius: 11, wobble: 40, photo: dogPhotos[7] },
+      { title: 'Wild Day Challenge', description: '30 dogs. The pack has standards now.', dots: 30, radius: 10, wobble: 44, photo: dogPhotos[8] },
+      { title: 'Final Pack Reveal', description: '30 tight dogs. Finish clean and meet the final trail dog.', dots: 30, radius: 10, wobble: 48, photo: dogPhotos[9] }
     ];
 
     let roundIndex = 0;
@@ -725,7 +742,7 @@
       const isCurrent = index === currentIndex;
       const isNext = index === currentIndex + 1;
       const emoji = dogMarkerEmojis[index % dogMarkerEmojis.length];
-      const r = round.radius + 12;
+      const r = round.radius + 7;
 
       ctx.beginPath();
       ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
@@ -741,13 +758,13 @@
       ctx.strokeStyle = isCurrent ? '#3E3A36' : 'rgba(62, 58, 54, 0.50)';
       ctx.stroke();
 
-      ctx.font = round.radius <= 14 ? '18px Arial' : '20px Arial';
+      ctx.font = round.radius <= 11 ? '14px Arial' : '16px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(emoji, p.x, p.y - 5);
 
       ctx.beginPath();
-      ctx.arc(p.x, p.y + r - 1, 10, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y + r - 1, 8, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(255, 248, 238, 0.95)';
       ctx.fill();
       ctx.strokeStyle = 'rgba(62, 58, 54, 0.34)';
@@ -755,7 +772,7 @@
       ctx.stroke();
 
       ctx.fillStyle = '#3E3A36';
-      ctx.font = 'bold 10px Arial';
+      ctx.font = 'bold 9px Arial';
       ctx.fillText(index + 1, p.x, p.y + r);
     }
 
@@ -766,7 +783,7 @@
       const nextPoint = points[currentIndex + 1];
       const targetPoint = currentIndex === 0 ? currentPoint : nextPoint;
       const targetIndex = currentIndex === 0 ? 0 : currentIndex + 1;
-      const hitRadius = getRound().radius + 22;
+      const hitRadius = getRound().radius + 18;
 
       if (!targetPoint) return;
 
