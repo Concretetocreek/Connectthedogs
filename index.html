@@ -533,6 +533,72 @@
       return rounds[roundIndex];
     }
 
+    function getEvenlySpacedTemplatePoints(template, count) {
+      const distances = [0];
+      let totalLength = 0;
+
+      for (let i = 1; i < template.length; i++) {
+        const previous = template[i - 1];
+        const current = template[i];
+        const segmentLength = Math.hypot(current[0] - previous[0], current[1] - previous[1]);
+        totalLength += segmentLength;
+        distances.push(totalLength);
+      }
+
+      const selected = [];
+      for (let i = 0; i < count; i++) {
+        const targetDistance = (i / Math.max(1, count - 1)) * totalLength;
+        let segmentIndex = 1;
+
+        while (segmentIndex < distances.length - 1 && distances[segmentIndex] < targetDistance) {
+          segmentIndex += 1;
+        }
+
+        const previousDistance = distances[segmentIndex - 1];
+        const nextDistance = distances[segmentIndex];
+        const segmentProgress = nextDistance === previousDistance ? 0 : (targetDistance - previousDistance) / (nextDistance - previousDistance);
+        const previous = template[segmentIndex - 1];
+        const next = template[segmentIndex];
+
+        selected.push([
+          previous[0] + (next[0] - previous[0]) * segmentProgress,
+          previous[1] + (next[1] - previous[1]) * segmentProgress
+        ]);
+      }
+
+      return selected;
+    }
+
+    function separateCrowdedPoints(pointsToSeparate, minimumDistance = 24) {
+      const separated = pointsToSeparate.map((point) => ({ ...point }));
+
+      for (let pass = 0; pass < 8; pass++) {
+        for (let i = 0; i < separated.length; i++) {
+          for (let j = i + 1; j < separated.length; j++) {
+            const dx = separated[j].x - separated[i].x;
+            const dy = separated[j].y - separated[i].y;
+            const distanceBetween = Math.hypot(dx, dy);
+
+            if (distanceBetween > 0 && distanceBetween < minimumDistance) {
+              const push = (minimumDistance - distanceBetween) / 2;
+              const ux = dx / distanceBetween;
+              const uy = dy / distanceBetween;
+
+              separated[i].x -= ux * push;
+              separated[i].y -= uy * push;
+              separated[j].x += ux * push;
+              separated[j].y += uy * push;
+            }
+          }
+        }
+      }
+
+      return separated.map((point) => ({
+        x: Math.max(32, Math.min(W - 32, point.x)),
+        y: Math.max(36, Math.min(H - 36, point.y))
+      }));
+    }
+
     function makePoints(count, wobble) {
       // Each template is a normalized dog-shaped outline.
       // The points are intentionally ordered like a classic connect-the-dots puzzle.
@@ -569,12 +635,19 @@
       ];
 
       const template = templates[roundIndex % templates.length];
-      const selected = [];
 
-      for (let i = 0; i < count; i++) {
-        const templateIndex = Math.round((i / Math.max(1, count - 1)) * (template.length - 1));
-        selected.push(template[templateIndex]);
-      }
+      // Remove repeated closure points so marker 1 does not sit on top of another marker.
+      const cleanedTemplate = template.filter((point, index, arr) => {
+        if (index === 0) return true;
+        const previous = arr[index - 1];
+        return point[0] !== previous[0] || point[1] !== previous[1];
+      }).filter((point, index, arr) => {
+        if (index !== arr.length - 1) return true;
+        const first = arr[0];
+        return point[0] !== first[0] || point[1] !== first[1];
+      });
+
+      const selected = getEvenlySpacedTemplatePoints(cleanedTemplate, count);
 
       const minX = Math.min(...selected.map((p) => p[0]));
       const maxX = Math.max(...selected.map((p) => p[0]));
@@ -594,7 +667,7 @@
       const centerX = W / 2;
       const centerY = H / 2;
 
-      return selected.map((raw, index) => {
+      const placedPoints = selected.map((raw, index) => {
         const rawX = mirror ? maxX - (raw[0] - minX) : raw[0];
         let x = offsetX + (rawX - minX) * scale;
         let y = offsetY + (raw[1] - minY) * scale;
@@ -613,6 +686,8 @@
           y: Math.max(36, Math.min(H - 36, y))
         };
       });
+
+      return separateCrowdedPoints(placedPoints, 26);
     }
 
     function loadRound() {
