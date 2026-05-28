@@ -302,12 +302,12 @@
           <strong id="scoreStat">0</strong>
         </div>
         <div class="stat">
-          <span>Dots</span>
-          <strong id="dotStat">24</strong>
+          <span>Time</span>
+          <strong id="timeStat">0.0s</strong>
         </div>
         <div class="stat">
-          <span>Misses</span>
-          <strong id="missStat">0</strong>
+          <span>Accuracy</span>
+          <strong id="accuracyStat">100%</strong>
         </div>
       </div>
 
@@ -348,8 +348,8 @@
 
     const roundStat = document.getElementById('roundStat');
     const scoreStat = document.getElementById('scoreStat');
-    const dotStat = document.getElementById('dotStat');
-    const missStat = document.getElementById('missStat');
+    const timeStat = document.getElementById('timeStat');
+    const accuracyStat = document.getElementById('accuracyStat');
     const roundImage = document.getElementById('roundImage');
     const roundTitle = document.getElementById('roundTitle');
     const roundDescription = document.getElementById('roundDescription');
@@ -361,6 +361,12 @@
 
     const W = canvas.width;
     const H = canvas.height;
+
+    const dogMarkerEmojis = [
+      '🐶', '🐕', '🐕‍🦺', '🦮', '🐩', '🐾', '🦴', '🥾', '🌲', '🍂',
+      '🐶', '🐕', '🐕‍🦺', '🦮', '🐩', '🐾', '🦴', '🌿', '🏞️', '🍃',
+      '🐶', '🐕', '🐕‍🦺', '🦮', '🐩', '🐾', '🦴', '🌲', '🌿', '🍂'
+    ];
 
     const dogPhotos = [
       'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1000&q=80',
@@ -468,6 +474,11 @@
     let mouse = { x: 0, y: 0 };
     let score = 0;
     let misses = 0;
+    let attempts = 0;
+    let roundStartTime = null;
+    let elapsedSeconds = 0;
+    let stopwatchTimer = null;
+    let lastRoundBonus = 0;
     let wrongFlash = 0;
     let revealImage = new Image();
 
@@ -561,6 +572,10 @@
       currentIndex = 0;
       isDrawing = false;
       revealed = false;
+      attempts = 0;
+      elapsedSeconds = 0;
+      lastRoundBonus = 0;
+      stopStopwatch();
       revealImage = new Image();
       revealImage.crossOrigin = 'anonymous';
       revealImage.src = round.photo;
@@ -571,13 +586,45 @@
 
     function updateHud() {
       const round = getRound();
+      const accuracy = attempts === 0 ? 100 : Math.max(0, Math.round(((attempts - misses) / attempts) * 100));
       roundStat.textContent = `${roundIndex + 1} / ${rounds.length}`;
       scoreStat.textContent = score;
-      dotStat.textContent = round.dots;
-      missStat.textContent = misses;
+      timeStat.textContent = `${elapsedSeconds.toFixed(1)}s`;
+      accuracyStat.textContent = `${accuracy}%`;
       difficultyPill.textContent = `${round.dots} dots`;
       roundTitle.textContent = round.title;
       roundDescription.textContent = round.description;
+    }
+
+    function startStopwatch() {
+      stopStopwatch();
+      roundStartTime = performance.now();
+      elapsedSeconds = 0;
+      stopwatchTimer = window.setInterval(() => {
+        if (!started || revealed || gameComplete || !roundStartTime) return;
+        elapsedSeconds = (performance.now() - roundStartTime) / 1000;
+        updateHud();
+      }, 100);
+    }
+
+    function stopStopwatch() {
+      window.clearInterval(stopwatchTimer);
+      stopwatchTimer = null;
+      if (roundStartTime) {
+        elapsedSeconds = (performance.now() - roundStartTime) / 1000;
+      }
+      roundStartTime = null;
+      updateHud();
+    }
+
+    function calculateRoundBonus() {
+      const round = getRound();
+      const expectedCleanTime = round.dots * 1.25;
+      const speedScore = Math.max(0, Math.round((expectedCleanTime - elapsedSeconds) * 12));
+      const accuracyRate = attempts === 0 ? 1 : Math.max(0, (attempts - misses) / attempts);
+      const accuracyBonus = Math.round(round.dots * 20 * accuracyRate);
+      const perfectBonus = misses === 0 ? 250 : 0;
+      return Math.max(0, speedScore + accuracyBonus + perfectBonus);
     }
 
     function setMessage(text, persistent = false) {
@@ -596,17 +643,23 @@
       roundIndex = 0;
       score = 0;
       misses = 0;
+      attempts = 0;
+      elapsedSeconds = 0;
       started = true;
       gameComplete = false;
       loadRound();
+      startStopwatch();
       instructionText.textContent = 'Drag from dog 1 to dog 2, then keep going in order.';
       setMessage('Start at dog 1. Connect every dog marker to reveal the photo.', false);
     }
 
     function resetGame() {
+      stopStopwatch();
       roundIndex = 0;
       score = 0;
       misses = 0;
+      attempts = 0;
+      elapsedSeconds = 0;
       started = false;
       revealed = false;
       gameComplete = false;
@@ -673,7 +726,7 @@
       ctx.font = 'bold 36px Georgia';
       ctx.fillText(gameComplete ? 'Final Dog Revealed' : 'Dog Revealed', W / 2, 42);
       ctx.font = '16px Arial';
-      ctx.fillText(gameComplete ? `Final score: ${score}` : 'Next round loading...', W / 2, 70);
+      ctx.fillText(gameComplete ? `Final score: ${score}` : `Bonus: +${lastRoundBonus}. Next round loading...`, W / 2, 70);
 
       ctx.restore();
     }
@@ -750,13 +803,14 @@
         const isCurrent = index === currentIndex;
         const isNext = index === currentIndex + 1;
         const radius = getRound().radius;
+        const markerEmoji = dogMarkerEmojis[index % dogMarkerEmojis.length];
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, radius + 9, 0, Math.PI * 2);
         ctx.fillStyle = isDone
-          ? 'rgba(109, 105, 95, 0.42)'
+          ? 'rgba(109, 105, 95, 0.34)'
           : isCurrent
-            ? 'rgba(230, 102, 55, 0.94)'
+            ? 'rgba(230, 102, 55, 0.92)'
             : isNext
               ? 'rgba(143, 175, 194, 0.90)'
               : 'rgba(255, 248, 238, 0.96)';
@@ -766,16 +820,22 @@
         ctx.strokeStyle = isCurrent ? '#3E3A36' : 'rgba(62, 58, 54, 0.55)';
         ctx.stroke();
 
-        ctx.fillStyle = '#3E3A36';
-        ctx.font = radius <= 14 ? 'bold 11px Arial' : 'bold 13px Arial';
+        ctx.font = radius <= 14 ? '18px Arial' : '20px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(index + 1, p.x, p.y + 1);
+        ctx.fillText(markerEmoji, p.x, p.y - 5);
 
-        if (index === 0 || index === points.length - 1) {
-          ctx.font = '18px Arial';
-          ctx.fillText('🐶', p.x, p.y - radius - 14);
-        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y + radius + 8, 10, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 248, 238, 0.94)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(62, 58, 54, 0.42)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.fillStyle = '#3E3A36';
+        ctx.font = 'bold 10px Arial';
+        ctx.fillText(index + 1, p.x, p.y + radius + 9);
       });
 
       if (wrongFlash > 0) {
@@ -792,11 +852,12 @@
       if (!started || revealed || gameComplete) return;
 
       e.preventDefault();
-      const pos = pointFromEvent(e); 
+      const pos = pointFromEvent(e);
       mouse = pos;
       const currentPoint = points[currentIndex];
 
       if (distance(pos, currentPoint) <= getRound().radius + 12) {
+        if (!roundStartTime) startStopwatch();
         isDrawing = true;
         messageBox.classList.add('hidden');
       } else {
@@ -821,6 +882,8 @@
       const pos = e.changedTouches ? pointFromTouchEnd(e) : pointFromEvent(e);
       mouse = pos;
       const nextPoint = points[currentIndex + 1];
+
+      attempts += 1;
 
       if (nextPoint && distance(pos, nextPoint) <= getRound().radius + 14) {
         currentIndex += 1;
@@ -849,8 +912,10 @@
     }
 
     function revealRound() {
+      stopStopwatch();
       revealed = true;
-      score += getRound().dots * 25;
+      lastRoundBonus = calculateRoundBonus();
+      score += getRound().dots * 25 + lastRoundBonus;
       updateHud();
 
       if (roundIndex === rounds.length - 1) {
@@ -861,13 +926,14 @@
         return;
       }
 
-      setMessage('Dog photo revealed. Next round loading.', true);
+      setMessage(`Dog photo revealed. Bonus: +${lastRoundBonus} based on speed and accuracy. Next round loading.`, true);
       draw();
 
       window.setTimeout(() => {
         roundIndex += 1;
         loadRound();
         revealed = false;
+        startStopwatch();
         instructionText.textContent = 'Start at dog 1 and connect each number in order.';
         setMessage('New hidden dog photo. Connect every marker to reveal it.', false);
       }, 2200);
