@@ -534,28 +534,85 @@
     }
 
     function makePoints(count, wobble) {
-      const pts = [];
-      const marginX = 52;
-      const top = 54;
-      const bottom = H - 58;
-      const usableHeight = bottom - top;
-      const centerX = W / 2;
+      // Each template is a normalized dog-shaped outline.
+      // The points are intentionally ordered like a classic connect-the-dots puzzle.
+      const templates = [
+        // 1. Dog head with pointy ears
+        [[22,34],[30,16],[39,35],[50,31],[61,35],[70,16],[78,34],[81,48],[75,63],[64,75],[52,80],[40,77],[28,66],[20,51],[22,34],[34,43],[43,47],[50,45],[57,47],[66,43]],
+
+        // 2. Sitting dog side profile
+        [[30,28],[42,20],[55,23],[66,33],[74,47],[72,62],[62,74],[48,78],[34,76],[24,66],[22,52],[28,40],[30,28],[61,35],[73,28],[80,33],[75,40],[66,39],[49,49],[43,61],[50,73],[36,75],[30,62]],
+
+        // 3. Running dog
+        [[16,48],[26,36],[40,31],[55,33],[68,42],[80,39],[88,45],[78,51],[67,50],[57,62],[66,76],[56,78],[49,66],[36,65],[29,78],[19,75],[27,61],[16,55],[16,48],[39,31],[45,20],[53,31],[62,25],[66,38]],
+
+        // 4. Puppy face with floppy ears
+        [[23,32],[34,21],[47,25],[54,35],[66,25],[79,32],[83,50],[77,68],[63,79],[50,82],[37,79],[23,68],[17,50],[23,32],[31,43],[39,47],[46,45],[54,45],[61,47],[69,43],[58,61],[50,67],[42,61]],
+
+        // 5. Dog standing with tail
+        [[14,51],[24,39],[39,33],[56,35],[70,45],[82,39],[88,45],[78,52],[72,64],[60,69],[45,68],[36,78],[28,76],[33,66],[24,63],[18,75],[10,72],[17,61],[14,51],[39,33],[43,23],[51,34],[61,27],[65,40]],
+
+        // 6. Dog head tilted
+        [[30,26],[44,15],[54,31],[64,22],[77,31],[82,46],[78,62],[66,75],[51,82],[36,76],[25,63],[20,47],[30,26],[35,42],[43,47],[50,44],[57,47],[65,42],[58,60],[50,66],[42,60],[31,72],[20,78],[22,62]],
+
+        // 7. Long-eared hound
+        [[32,24],[45,18],[58,21],[70,32],[75,50],[71,68],[58,80],[43,81],[28,70],[21,52],[25,35],[32,24],[24,38],[16,50],[18,69],[28,74],[31,55],[69,36],[82,48],[80,68],[70,74],[68,55],[42,45],[50,43]],
+
+        // 8. Dog with raised paw
+        [[24,45],[32,30],[45,25],[59,29],[70,42],[76,58],[70,72],[56,80],[40,78],[28,66],[24,45],[42,25],[46,15],[54,27],[62,18],[65,33],[37,50],[28,38],[18,33],[13,40],[23,50],[49,60],[45,77],[34,77],[40,63]],
+
+        // 9. Terrier style head
+        [[25,37],[33,19],[44,36],[50,31],[56,36],[67,19],[75,37],[82,52],[77,66],[64,78],[50,83],[36,78],[23,66],[18,52],[25,37],[36,46],[44,48],[50,46],[56,48],[64,46],[60,61],[50,70],[40,61],[31,72],[23,76],[27,61]],
+
+        // 10. Final full-body dog
+        [[12,50],[22,37],[36,31],[52,31],[66,39],[76,36],[88,42],[80,50],[70,51],[64,63],[55,70],[42,69],[34,78],[25,76],[31,65],[21,61],[16,75],[8,72],[14,60],[12,50],[36,31],[39,20],[48,31],[58,22],[62,37],[51,48],[42,49],[31,45],[23,51]]
+      ];
+
+      const template = templates[roundIndex % templates.length];
+      const selected = [];
 
       for (let i = 0; i < count; i++) {
-        const progress = i / (count - 1);
-        const y = top + usableHeight * progress;
-        const wave1 = Math.sin(progress * Math.PI * 5.2) * (72 + wobble);
-        const wave2 = Math.sin(progress * Math.PI * 10.4 + 1.7) * (18 + wobble * 0.35);
-        const dogHeadCurve = Math.sin(progress * Math.PI) * 18;
-        const x = centerX + wave1 + wave2 + dogHeadCurve;
-
-        pts.push({
-          x: Math.max(marginX, Math.min(W - marginX, x)),
-          y
-        });
+        const templateIndex = Math.round((i / Math.max(1, count - 1)) * (template.length - 1));
+        selected.push(template[templateIndex]);
       }
 
-      return pts;
+      const minX = Math.min(...selected.map((p) => p[0]));
+      const maxX = Math.max(...selected.map((p) => p[0]));
+      const minY = Math.min(...selected.map((p) => p[1]));
+      const maxY = Math.max(...selected.map((p) => p[1]));
+
+      const drawingWidth = W - 74;
+      const drawingHeight = H - 94;
+      const scale = Math.min(drawingWidth / (maxX - minX), drawingHeight / (maxY - minY));
+      const offsetX = (W - (maxX - minX) * scale) / 2;
+      const offsetY = (H - (maxY - minY) * scale) / 2;
+
+      const mirror = roundIndex % 2 === 1;
+      const tilt = ((roundIndex % 5) - 2) * 0.035;
+      const verticalShift = ((roundIndex % 3) - 1) * 12;
+      const horizontalShift = ((roundIndex % 4) - 1.5) * 8;
+      const centerX = W / 2;
+      const centerY = H / 2;
+
+      return selected.map((raw, index) => {
+        const rawX = mirror ? maxX - (raw[0] - minX) : raw[0];
+        let x = offsetX + (rawX - minX) * scale;
+        let y = offsetY + (raw[1] - minY) * scale;
+
+        const dx = x - centerX;
+        const dy = y - centerY;
+        x = centerX + dx - dy * tilt + horizontalShift;
+        y = centerY + dy + dx * tilt + verticalShift;
+
+        // Tiny round-specific irregularity so repeated dot counts still feel hand-placed.
+        x += Math.sin(index * 1.7 + roundIndex * 2.2) * Math.min(6, wobble * 0.12);
+        y += Math.cos(index * 1.5 + roundIndex * 1.8) * Math.min(6, wobble * 0.10);
+
+        return {
+          x: Math.max(32, Math.min(W - 32, x)),
+          y: Math.max(36, Math.min(H - 36, y))
+        };
+      });
     }
 
     function loadRound() {
