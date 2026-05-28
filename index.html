@@ -1,193 +1,814 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect the Dogs</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f8ff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concrete to Creek Trail Match Game</title>
+  <style>
+    :root {
+      --paper: #F1E0CA;
+      --paper-light: #FAF3E8;
+      --ink: #3E3A36;
+      --sage: #6D695F;
+      --water: #8FAFC2;
+      --trail: #E66637;
+      --cream: #FFF8EE;
+      --mistake: #B55342;
+      --shadow: rgba(62, 58, 54, 0.18);
+    }
 
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        p {
-            color: #666;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, 'Times New Roman', serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 18%, rgba(143, 175, 194, 0.28), transparent 26%),
+        radial-gradient(circle at 82% 12%, rgba(230, 102, 55, 0.12), transparent 22%),
+        linear-gradient(135deg, var(--paper), var(--paper-light));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 22px;
+    }
 
-        /* The canvas where the game is drawn */
-        #gameCanvas {
-            background-color: white;
-            border: 4px solid #8b4513; /* Brown border */
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            cursor: crosshair;
-        }
-    </style>
+    .game-shell {
+      width: min(1060px, 100%);
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .panel,
+    .canvas-card {
+      background: rgba(255, 248, 238, 0.92);
+      border: 1px solid rgba(62, 58, 54, 0.18);
+      border-radius: 24px;
+      box-shadow: 0 18px 44px var(--shadow);
+    }
+
+    .panel {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--sage);
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(32px, 4vw, 46px);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    .intro {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--sage);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      background: rgba(241, 224, 202, 0.68);
+      border: 1px solid rgba(62, 58, 54, 0.12);
+      border-radius: 16px;
+      padding: 12px;
+      font-family: Arial, sans-serif;
+    }
+
+    .stat span {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--sage);
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+
+    .stat strong {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .round-card {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(62, 58, 54, 0.16);
+      background: white;
+    }
+
+    .round-card img {
+      display: block;
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      filter: saturate(0.85) contrast(0.96);
+    }
+
+    .round-copy {
+      padding: 14px;
+      font-family: Arial, sans-serif;
+    }
+
+    .round-copy h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .round-copy p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--sage);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 16px;
+      font-family: Arial, sans-serif;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(62, 58, 54, 0.16);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .primary {
+      background: var(--trail);
+      color: #241D18;
+    }
+
+    .secondary {
+      background: rgba(143, 175, 194, 0.55);
+      color: var(--ink);
+    }
+
+    .canvas-card {
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .canvas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+      font-family: Arial, sans-serif;
+      color: var(--sage);
+      font-size: 14px;
+    }
+
+    .difficulty-pill {
+      background: rgba(109, 105, 95, 0.14);
+      border: 1px solid rgba(62, 58, 54, 0.12);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      min-height: 320px;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 3px solid rgba(62, 58, 54, 0.28);
+      background:
+        linear-gradient(rgba(255, 248, 238, 0.82), rgba(255, 248, 238, 0.82)),
+        url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80') center/cover;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    .message {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 248, 238, 0.92);
+      border: 1px solid rgba(62, 58, 54, 0.16);
+      box-shadow: 0 10px 28px rgba(62, 58, 54, 0.16);
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--ink);
+      pointer-events: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .brand-footer {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: var(--sage);
+      line-height: 1.45;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        align-items: flex-start;
+      }
+
+      .game-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        order: 2;
+      }
+
+      .canvas-card {
+        order: 1;
+      }
+    }
+  </style>
 </head>
 <body>
+  <main class="game-shell">
+    <section class="panel" aria-label="Game information">
+      <p class="eyebrow">Concrete to Creek</p>
+      <h1>Trail Match</h1>
+      <p class="intro">
+        Trace the numbered route in order. Each round gets tighter, faster, and less forgiving.
+        Because apparently even a browser game needs standards.
+      </p>
 
-    <h1>Connect the Dogs! 🐾</h1>
-    <p>Click and drag from dog 1, to dog 2, to dog 3...</p>
+      <div class="stat-grid">
+        <div class="stat">
+          <span>Round</span>
+          <strong id="roundStat">1 / 10</strong>
+        </div>
+        <div class="stat">
+          <span>Score</span>
+          <strong id="scoreStat">0</strong>
+        </div>
+        <div class="stat">
+          <span>Time</span>
+          <strong id="timeStat">45</strong>
+        </div>
+        <div class="stat">
+          <span>Misses</span>
+          <strong id="missStat">0</strong>
+        </div>
+      </div>
 
-    <canvas id="gameCanvas" width="500" height="500"></canvas>
+      <div class="round-card">
+        <img id="roundImage" src="" alt="Dog on a trail" />
+        <div class="round-copy">
+          <h2 id="roundTitle">Loading trail...</h2>
+          <p id="roundDescription">The dogs are assembling, which is already more organized than most group chats.</p>
+        </div>
+      </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+      <div class="controls">
+        <button class="primary" id="startBtn">Start Trail</button>
+        <button class="secondary" id="resetBtn">Reset Game</button>
+      </div>
 
-        // The coordinates for our small dogs (forming a basic dog face shape)
-        const dogs = [
-            { x: 150, y: 150 }, // 1. Left Ear Top
-            { x: 200, y: 200 }, // 2. Left Ear Base
-            { x: 300, y: 200 }, // 3. Right Ear Base
-            { x: 350, y: 150 }, // 4. Right Ear Top
-            { x: 400, y: 280 }, // 5. Right Cheek
-            { x: 300, y: 380 }, // 6. Chin Right
-            { x: 200, y: 380 }, // 7. Chin Left
-            { x: 100, y: 280 }  // 8. Left Cheek
-        ];
+      <p class="brand-footer">
+        Built for small-group structure, calm movement, and dogs who deserve better than another lap around the block.
+      </p>
+    </section>
 
-        let currentDogIndex = 0; // Starts at Dog 1
-        let isDrawing = false;
-        let mouseX = 0;
-        let mouseY = 0;
-        let gameWon = false;
+    <section class="canvas-card" aria-label="Trail game board">
+      <div class="canvas-header">
+        <span id="instructionText">Start at marker 1 and follow the route.</span>
+        <span class="difficulty-pill" id="difficultyPill">Warmup</span>
+      </div>
 
-        // Load the Big Dog image (the reveal)
-        const bigDogImg = new Image();
-        // Using a cute placeholder dog image from Unsplash
-        bigDogImg.src = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas" width="700" height="700"></canvas>
+        <div class="message" id="messageBox">Press Start Trail. Then drag from marker to marker in order.</div>
+      </div>
+    </section>
+  </main>
 
-        // Helper function to calculate distance between two points
-        function getDistance(x1, y1, x2, y2) {
-            return Math.hypot(x2 - x1, y2 - y1);
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const roundStat = document.getElementById('roundStat');
+    const scoreStat = document.getElementById('scoreStat');
+    const timeStat = document.getElementById('timeStat');
+    const missStat = document.getElementById('missStat');
+    const roundImage = document.getElementById('roundImage');
+    const roundTitle = document.getElementById('roundTitle');
+    const roundDescription = document.getElementById('roundDescription');
+    const instructionText = document.getElementById('instructionText');
+    const difficultyPill = document.getElementById('difficultyPill');
+    const messageBox = document.getElementById('messageBox');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const W = canvas.width;
+    const H = canvas.height;
+
+    const rounds = [
+      {
+        title: 'Prospect Park Warmup',
+        description: 'A steady loop for dogs learning the rules before the woods get opinionated.',
+        difficulty: 'Warmup',
+        time: 45,
+        radius: 34,
+        image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=80',
+        points: [[150, 175], [300, 135], [475, 170], [555, 320], [460, 500], [280, 555], [130, 445]]
+      },
+      {
+        title: 'Ravine Route',
+        description: 'More markers, tighter turns, and fewer chances to pretend the leash is optional.',
+        difficulty: 'Easy',
+        time: 42,
+        radius: 32,
+        image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
+        points: [[105, 210], [240, 110], [405, 125], [565, 235], [540, 410], [405, 565], [220, 545], [110, 405]]
+      },
+      {
+        title: 'Creek Crossing',
+        description: 'The route bends near water. Stay calm. Nobody needs a theatrical splash scene.',
+        difficulty: 'Easy+',
+        time: 40,
+        radius: 30,
+        image: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=900&q=80',
+        points: [[120, 155], [270, 95], [430, 135], [555, 250], [520, 420], [390, 545], [235, 595], [115, 495], [185, 330]]
+      },
+      {
+        title: 'Pack Match',
+        description: 'The path crosses itself now. Structure matters. Chaos has enough hobbies.',
+        difficulty: 'Medium',
+        time: 38,
+        radius: 29,
+        image: 'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=900&q=80',
+        points: [[115, 130], [560, 155], [210, 525], [350, 90], [505, 535], [130, 330], [575, 345], [325, 600]]
+      },
+      {
+        title: 'Long Line Lesson',
+        description: 'A cleaner route with smaller targets. Freedom, but with management. Fancy concept.',
+        difficulty: 'Medium',
+        time: 36,
+        radius: 27,
+        image: 'https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=900&q=80',
+        points: [[95, 185], [215, 95], [370, 125], [605, 110], [520, 300], [620, 500], [390, 575], [250, 450], [105, 555], [175, 315]]
+      },
+      {
+        title: 'Hudson Valley Climb',
+        description: 'The trail gets steep. The standards remain annoying, which is how safety works.',
+        difficulty: 'Medium+',
+        time: 34,
+        radius: 26,
+        image: 'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=900&q=80',
+        points: [[115, 585], [150, 385], [85, 205], [255, 115], [390, 245], [570, 125], [610, 330], [470, 430], [540, 595], [320, 555], [245, 365]]
+      },
+      {
+        title: 'Quiet Trail Test',
+        description: 'Fewer visual hints. Better trail manners. Stunning what happens when someone plans.',
+        difficulty: 'Hard',
+        time: 32,
+        radius: 24,
+        image: 'https://images.unsplash.com/photo-1525253086316-d0c936c814f8?auto=format&fit=crop&w=900&q=80',
+        points: [[90, 120], [250, 80], [405, 165], [580, 90], [625, 255], [470, 340], [610, 505], [410, 610], [285, 470], [120, 585], [185, 330]]
+      },
+      {
+        title: 'Trail Report',
+        description: 'This one rewards precision. The browser, tragically, has become your handler.',
+        difficulty: 'Hard',
+        time: 30,
+        radius: 23,
+        image: 'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?auto=format&fit=crop&w=900&q=80',
+        points: [[340, 70], [430, 205], [610, 165], [510, 330], [625, 485], [445, 460], [375, 625], [280, 465], [100, 520], [190, 350], [80, 190], [260, 235]]
+      },
+      {
+        title: 'Off-City Adventure',
+        description: 'Fast clock. Small targets. The city dog earns the woods today.',
+        difficulty: 'Expert',
+        time: 28,
+        radius: 22,
+        image: 'https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?auto=format&fit=crop&w=900&q=80',
+        points: [[100, 105], [285, 70], [235, 225], [430, 110], [590, 180], [455, 285], [620, 390], [480, 550], [315, 430], [205, 610], [95, 455], [225, 340]]
+      },
+      {
+        title: 'Wild Day Final',
+        description: 'The final route. Calm hands, clean lines, no nonsense. A shocking idea online.',
+        difficulty: 'Final',
+        time: 25,
+        radius: 20,
+        image: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=900&q=80',
+        points: [[350, 60], [510, 125], [465, 270], [620, 230], [565, 405], [440, 360], [480, 610], [325, 500], [190, 625], [230, 390], [75, 470], [185, 300], [80, 135], [260, 210]]
+      }
+    ];
+
+    let roundIndex = 0;
+    let currentPointIndex = 0;
+    let isDrawing = false;
+    let gameStarted = false;
+    let roundComplete = false;
+    let gameComplete = false;
+    let mouse = { x: 0, y: 0 };
+    let score = 0;
+    let misses = 0;
+    let timeLeft = rounds[0].time;
+    let timer = null;
+    let completedPath = [];
+    let wrongFlash = 0;
+
+    const dogIcons = ['🐕', '🐾', '🐶', '🦴'];
+
+    function getRound() {
+      return rounds[roundIndex];
+    }
+
+    function distance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function pointFromEvent(e) {
+      const rect = canvas.getBoundingClientRect();
+      const source = e.touches ? e.touches[0] : e;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (source.clientX - rect.left) * scaleX,
+        y: (source.clientY - rect.top) * scaleY
+      };
+    }
+
+    function updateHud() {
+      const round = getRound();
+      roundStat.textContent = `${roundIndex + 1} / ${rounds.length}`;
+      scoreStat.textContent = score;
+      timeStat.textContent = timeLeft;
+      missStat.textContent = misses;
+      roundTitle.textContent = round.title;
+      roundDescription.textContent = round.description;
+      roundImage.src = round.image;
+      difficultyPill.textContent = round.difficulty;
+    }
+
+    function setMessage(text, persistent = false) {
+      messageBox.textContent = text;
+      messageBox.classList.remove('hidden');
+      if (!persistent) {
+        window.clearTimeout(setMessage.timeout);
+        setMessage.timeout = window.setTimeout(() => {
+          if (gameStarted && !roundComplete && !gameComplete) messageBox.classList.add('hidden');
+        }, 2200);
+      }
+    }
+
+    function startTimer() {
+      window.clearInterval(timer);
+      timer = window.setInterval(() => {
+        if (!gameStarted || roundComplete || gameComplete) return;
+        timeLeft -= 1;
+        updateHud();
+        if (timeLeft <= 0) {
+          misses += 1;
+          score = Math.max(0, score - 75);
+          setMessage('Time ran out. Back to marker 1. Nature is patient. This game is not.', true);
+          resetRound(false);
         }
+      }, 1000);
+    }
 
-        // Draw the game frame
-        function draw() {
-            // Clear the canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function startGame() {
+      roundIndex = 0;
+      score = 0;
+      misses = 0;
+      gameComplete = false;
+      loadRound();
+      gameStarted = true;
+      startTimer();
+      setMessage('Trace from marker 1 to marker 2. Stay inside the targets.', false);
+      draw();
+    }
 
-            // 1. Draw the Big Dog if they won!
-            if (gameWon) {
-                ctx.globalAlpha = 0.8; // Make it slightly transparent so we can see lines
-                // Draw the image centered
-                ctx.drawImage(bigDogImg, 50, 50, 400, 400);
-                ctx.globalAlpha = 1.0; // Reset transparency
+    function loadRound() {
+      const round = getRound();
+      currentPointIndex = 0;
+      roundComplete = false;
+      isDrawing = false;
+      timeLeft = round.time;
+      completedPath = [toPoint(round.points[0])];
+      updateHud();
+      draw();
+    }
 
-                ctx.fillStyle = '#228B22';
-                ctx.font = 'bold 30px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Good Job! You found the Big Dog!', canvas.width / 2, 40);
-            }
+    function resetRound(resetScore = true) {
+      if (resetScore) {
+        score = 0;
+        misses = 0;
+        roundIndex = 0;
+        gameComplete = false;
+      }
+      loadRound();
+      updateHud();
+    }
 
-            // 2. Draw the completed, solid lines
-            if (currentDogIndex > 0) {
-                ctx.beginPath();
-                ctx.moveTo(dogs[0].x, dogs[0].y);
-                for (let i = 1; i <= currentDogIndex; i++) {
-                    // If game won, wrap back to 0 to close the shape
-                    let idx = (i === dogs.length) ? 0 : i; 
-                    ctx.lineTo(dogs[idx].x, dogs[idx].y);
-                }
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 4;
-                ctx.stroke();
-            }
+    function toPoint(pair) {
+      return { x: pair[0], y: pair[1] };
+    }
 
-            // 3. Draw the temporary dashed line following the mouse
-            if (isDrawing && !gameWon) {
-                ctx.beginPath();
-                ctx.moveTo(dogs[currentDogIndex].x, dogs[currentDogIndex].y);
-                ctx.lineTo(mouseX, mouseY);
-                ctx.strokeStyle = '#999';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]); // Dashed line effect
-                ctx.stroke();
-                ctx.setLineDash([]); // Reset to solid for other lines
-            }
+    function currentTarget() {
+      return toPoint(getRound().points[currentPointIndex]);
+    }
 
-            // 4. Draw the small dogs (nodes)
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            dogs.forEach((dog, index) => {
-                // Draw the dog emoji
-                ctx.font = '24px Arial';
-                ctx.fillText('🐶', dog.x, dog.y - 12);
-                
-                // Draw the number below it
-                ctx.font = 'bold 14px Arial';
-                ctx.fillStyle = '#000';
-                ctx.fillText(index + 1, dog.x, dog.y + 15);
-            });
+    function nextTarget() {
+      return toPoint(getRound().points[currentPointIndex + 1]);
+    }
+
+    function drawBackgroundDetails() {
+      ctx.save();
+      ctx.globalAlpha = 0.36;
+
+      ctx.strokeStyle = '#8FAFC2';
+      ctx.lineWidth = 24;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(20, 520);
+      ctx.bezierCurveTo(175, 435, 210, 590, 360, 500);
+      ctx.bezierCurveTo(510, 410, 540, 545, 690, 445);
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#6D695F';
+      for (let i = 0; i < 28; i++) {
+        const x = (i * 97) % W;
+        const y = (i * 151) % H;
+        ctx.beginPath();
+        ctx.arc(x, y, 14 + (i % 3) * 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      drawBackgroundDetails();
+
+      const round = getRound();
+      const points = round.points.map(toPoint);
+
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.strokeStyle = 'rgba(62, 58, 54, 0.18)';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([8, 12]);
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (completedPath.length > 1) {
+        ctx.strokeStyle = '#E66637';
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.moveTo(completedPath[0].x, completedPath[0].y);
+        for (let i = 1; i < completedPath.length; i++) {
+          ctx.lineTo(completedPath[i].x, completedPath[i].y);
         }
+        ctx.stroke();
+      }
 
-        // --- Event Listeners for Mouse --- //
+      if (isDrawing && gameStarted && !roundComplete) {
+        const start = currentTarget();
+        ctx.strokeStyle = 'rgba(230, 102, 55, 0.75)';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([6, 8]);
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(mouse.x, mouse.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
 
-        canvas.addEventListener('mousedown', (e) => {
-            if (gameWon) return;
+      points.forEach((p, index) => {
+        const isDone = index < currentPointIndex;
+        const isCurrent = index === currentPointIndex;
+        const isNext = index === currentPointIndex + 1;
 
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
-            mouseY = e.clientY - rect.top;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, round.radius, 0, Math.PI * 2);
+        ctx.fillStyle = isDone ? 'rgba(109, 105, 95, 0.45)' : isCurrent ? 'rgba(230, 102, 55, 0.92)' : isNext ? 'rgba(143, 175, 194, 0.86)' : 'rgba(255, 248, 238, 0.92)';
+        ctx.fill();
+        ctx.lineWidth = isCurrent ? 4 : 2;
+        ctx.strokeStyle = isCurrent ? '#3E3A36' : 'rgba(62, 58, 54, 0.55)';
+        ctx.stroke();
 
-            // Check if user clicked near the current dog they are supposed to start from
-            if (getDistance(mouseX, mouseY, dogs[currentDogIndex].x, dogs[currentDogIndex].y) < 30) {
-                isDrawing = true;
-            }
-        });
+        ctx.fillStyle = '#3E3A36';
+        ctx.font = 'bold 18px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(index + 1, p.x, p.y);
 
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
+        if (index % 3 === 0) {
+          ctx.font = '18px Arial';
+          ctx.fillText(dogIcons[index % dogIcons.length], p.x, p.y - round.radius - 13);
+        }
+      });
 
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
-            mouseY = e.clientY - rect.top;
+      if (wrongFlash > 0) {
+        ctx.fillStyle = `rgba(181, 83, 66, ${wrongFlash})`;
+        ctx.fillRect(0, 0, W, H);
+        wrongFlash -= 0.04;
+        requestAnimationFrame(draw);
+      }
 
-            draw(); // Re-draw frame as mouse moves
-        });
+      if (roundComplete || gameComplete) {
+        ctx.fillStyle = 'rgba(255, 248, 238, 0.86)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#3E3A36';
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 42px Georgia';
+        ctx.fillText(gameComplete ? 'Trail Complete' : 'Round Cleared', W / 2, H / 2 - 20);
+        ctx.font = '18px Arial';
+        ctx.fillText(gameComplete ? `Final score: ${score}` : 'Loading next route...', W / 2, H / 2 + 25);
+      }
 
-        canvas.addEventListener('mouseup', (e) => {
-            if (!isDrawing) return;
-            isDrawing = false;
+      ctx.restore();
+    }
 
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
-            mouseY = e.clientY - rect.top;
+    function handleStart(e) {
+      if (!gameStarted || roundComplete || gameComplete) return;
+      const pos = pointFromEvent(e);
+      mouse = pos;
+      const start = currentTarget();
 
-            // Determine the next dog target (if at the end, the target is dog 1 [index 0])
-            let targetIndex = (currentDogIndex + 1) % dogs.length;
+      if (distance(pos, start) <= getRound().radius + 8) {
+        isDrawing = true;
+        setMessage('');
+        messageBox.classList.add('hidden');
+      } else {
+        registerMiss('Start on the current marker. The trail does not begin wherever vibes suggest.');
+      }
+      draw();
+    }
 
-            // Check if user let go of the mouse near the correct NEXT dog
-            if (getDistance(mouseX, mouseY, dogs[targetIndex].x, dogs[targetIndex].y) < 30) {
-                currentDogIndex++;
-                
-                // If they successfully connected back to the first dog
-                if (currentDogIndex === dogs.length) {
-                    gameWon = true;
-                }
-            }
-            
-            draw(); // Update the canvas
-        });
+    function handleMove(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      mouse = pointFromEvent(e);
+      draw();
+    }
 
-        // Initial draw call to display the dogs when the page loads
+    function handleEnd(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      isDrawing = false;
+
+      const pos = e.changedTouches ? pointFromTouchEnd(e) : pointFromEvent(e);
+      mouse = pos;
+      const target = nextTarget();
+
+      if (target && distance(pos, target) <= getRound().radius + 10) {
+        currentPointIndex += 1;
+        completedPath.push(target);
+        score += 100 + Math.max(0, timeLeft * 2) - misses * 4;
+        updateHud();
+
+        if (currentPointIndex === getRound().points.length - 1) {
+          finishRound();
+        } else {
+          instructionText.textContent = `Good. Now connect marker ${currentPointIndex + 1} to marker ${currentPointIndex + 2}.`;
+        }
+      } else {
+        registerMiss('Wrong marker, or not close enough. Precision, tragically, is part of the job.');
+      }
+
+      draw();
+    }
+
+    function pointFromTouchEnd(e) {
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.changedTouches[0];
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (touch.clientX - rect.left) * scaleX,
+        y: (touch.clientY - rect.top) * scaleY
+      };
+    }
+
+    function registerMiss(text) {
+      misses += 1;
+      score = Math.max(0, score - 35);
+      wrongFlash = 0.16;
+      updateHud();
+      setMessage(text, false);
+      draw();
+    }
+
+    function finishRound() {
+      roundComplete = true;
+      score += 250 + timeLeft * 8;
+      updateHud();
+
+      if (roundIndex === rounds.length - 1) {
+        gameComplete = true;
+        gameStarted = false;
+        window.clearInterval(timer);
+        setMessage('All routes cleared. The dog is regulated. The human is questionable, but improving.', true);
         draw();
+        return;
+      }
 
-    </script>
+      setMessage('Round cleared. Next route loading.', true);
+      draw();
+      window.setTimeout(() => {
+        roundIndex += 1;
+        loadRound();
+        roundComplete = false;
+        setMessage('New route. Start at marker 1.', false);
+      }, 1400);
+    }
+
+    startBtn.addEventListener('click', startGame);
+    resetBtn.addEventListener('click', () => {
+      window.clearInterval(timer);
+      gameStarted = false;
+      gameComplete = false;
+      resetRound(true);
+      setMessage('Game reset. Press Start Trail when ready.', true);
+      instructionText.textContent = 'Start at marker 1 and follow the route.';
+    });
+
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseup', handleEnd);
+    canvas.addEventListener('mouseleave', () => { isDrawing = false; draw(); });
+
+    canvas.addEventListener('touchstart', handleStart, { passive: false });
+    canvas.addEventListener('touchmove', handleMove, { passive: false });
+    canvas.addEventListener('touchend', handleEnd, { passive: false });
+
+    roundImage.addEventListener('error', () => {
+      roundImage.src = 'https://images.unsplash.com/photo-1444212477490-ca407925329e?auto=format&fit=crop&w=900&q=80';
+    });
+
+    loadRound();
+    setMessage('Press Start Trail. Then drag from marker to marker in order.', true);
+  </script>
 </body>
 </html>
